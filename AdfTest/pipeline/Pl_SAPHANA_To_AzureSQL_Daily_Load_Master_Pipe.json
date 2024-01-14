@@ -1,0 +1,146 @@
+{
+	"name": "Pl_SAPHANA_To_AzureSQL_Daily_Load_Master_Pipe",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lkp_Batch_Failures",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select count(*) as cnt from dbo.Batch_Job_Activity_Audit where batch_id=(select max(isnull(batch_id,0)) from dbo.Batch_Job_Activity_Audit) and status='FAILED' and LOAD_TYPE='DAILY' and SRC_TYPE='SAP HANA'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "TAAPortal_AzureDB_Ds",
+						"type": "DatasetReference",
+						"parameters": {
+							"TAA_Tgt_Schema": "dbo",
+							"TAA_Tgt_Tbl_Nm": "BATCH_JOB_ACTIVITY_AUDIT"
+						}
+					}
+				}
+			},
+			{
+				"name": "If_Failure_Cnt_Greater_Or_Equal",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Lkp_Batch_Failures",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greaterOrEquals(activity('Lkp_Batch_Failures').output.firstRow.cnt,1)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Execute_SAPHANA_To_AzureSQL_Daily_Batch_Load",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Pl_SAPHANA_To_AzureSQL_Daily_Load_Pipe",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Execute_SAPHANA_To_AzureSQL_Daily_Batch_Rerun",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Send_Mail_On_SAPHANA_Daily_Load_Failure_Batch_Rerun",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Pl_SAPHANA_To_AzureSQL_Daily_Load_Batch_Rerun_Pipe",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						},
+						{
+							"name": "Send_Mail_On_SAPHANA_Daily_Load_Failure_Batch_Rerun",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@pipeline().parameters.TAA_Send_Email_URL",
+									"type": "Expression"
+								},
+								"method": "POST",
+								"body": {
+									"value": "{\"Body_Message\":\"SAPHANA Daily Ingestion is holding failure batch run's for previous batch_id and we are proceedings to re-run the failure batch runs.\",\n\"Ingestion_Layer\":\"SRC-TGT\",\n\"Recipient_Emails\":\"@{pipeline().parameters.TAA_Support_Mailbox}\",\n\"Subject_Message\":\"SAPHANA Daily Ingestion failure batch re-run\"}",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"TAA_Send_Email_URL": {
+				"type": "string",
+				"defaultValue": "https://prod-104.westus.logic.azure.com:443/workflows/b1682dc3cf894db0bd371db2c867d612/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Qib8no95bsE7mUtWHaMLzOGcnNfrKvPxijW8-36G6s4"
+			},
+			"TAA_Support_Mailbox": {
+				"type": "string",
+				"defaultValue": "taaportalsupport@mckesson.com"
+			}
+		},
+		"variables": {
+			"TAAPortal_Environment": {
+				"type": "String"
+			},
+			"TAAPortal_Azure_Secret": {
+				"type": "String"
+			},
+			"TAAPortal_Logic_App_Url": {
+				"type": "String"
+			},
+			"TaaPortal_Recipient_Emails": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "SAPHANA_To_AzureSQL_Daily_Load"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-04-26T18:54:50Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,13 @@
+{
+	"name": "taaportal-nonprod-shir-link",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "Linked to MTGF-COMMON-NONPROD",
+		"typeProperties": {
+			"linkedInfo": {
+				"resourceId": "/subscriptions/a742554b-a5ed-47be-ab05-80056bc08178/resourcegroups/rg-mtgf-common/providers/Microsoft.DataFactory/factories/adf-mtgf-shared-nonProd/integrationruntimes/MTGF-DEV-Shared-SHIR",
+				"authorizationType": "Rbac"
+			}
+		}
+	}
+}

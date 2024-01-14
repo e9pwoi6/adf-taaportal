@@ -1,0 +1,25 @@
+{
+	"name": "Tgr_For_SPs_Exec",
+	"properties": {
+		"description": "Occurs every day at 2:00:00 AM. Schedule will be used starting on 04/11/2023.",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "Pl_Order_Of_SPs_Execution",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-04-11T02:10:00",
+				"timeZone": "Pacific Standard Time"
+			}
+		}
+	}
+}

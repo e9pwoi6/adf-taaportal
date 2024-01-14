@@ -1,0 +1,193 @@
+{
+	"name": "Pl_Alert_Email_on_Cert_Exp_and_New_Product_Addn",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lkp_for_New_Product_Addn",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[spProductAdditionAlert]",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "TAAPortal_AzureDB_Ds",
+						"type": "DatasetReference",
+						"parameters": {
+							"TAA_Tgt_Schema": "dbo",
+							"TAA_Tgt_Tbl_Nm": "Batch_Job_Activity_Audit"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach_For_Product_Addn",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lkp_for_New_Product_Addn",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lkp_for_New_Product_Addn').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Send_Email_On_NewProduct_Addn",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@pipeline().parameters.TAA_Send_Email_URL",
+									"type": "Expression"
+								},
+								"connectVia": {
+									"referenceName": "taaportal-dev-shir-link",
+									"type": "IntegrationRuntimeReference"
+								},
+								"method": "POST",
+								"body": {
+									"value": "{\"Body_Message\":\"New products have been added to @{item().DisplayName} in the McKesson TAA Portal that require your prompt attention. \nPlease click on the link below to log into your account and complete the certification process as soon as possible. \nFor more information, please contact the TAA Portal Team at TAA_Portal@McKesson.com.\",\n\"Ingestion_Layer\":\"PRODUCT-ADDITION\",\n\"Primary_Name\":\"@{item().PrimaryName}\",\n\"Primary_Emails\":\"@{item().PrimaryEmail}\",\n\"Recipient_Emails\":\"@{item().Recipients}\",\n\"Display_Name\":\"@{item().DisplayName}\",\n\"Subject_Message\":\"McKesson TAA Portal – New Products Added to Your Account\"}",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Lkp_for_Cert_Expiration",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[spCertificationToExpiredAlert]",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "TAAPortal_AzureDB_Ds",
+						"type": "DatasetReference",
+						"parameters": {
+							"TAA_Tgt_Schema": "dbo",
+							"TAA_Tgt_Tbl_Nm": "Batch_Job_Activity_Audit_DONTRUN"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach_for_Prod_Exp",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lkp_for_Cert_Expiration",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lkp_for_Cert_Expiration').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Send_Email_On_Product_Exp",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"url": {
+									"value": "@pipeline().parameters.TAA_Send_Email_URL",
+									"type": "Expression"
+								},
+								"connectVia": {
+									"referenceName": "taaportal-dev-shir-link",
+									"type": "IntegrationRuntimeReference"
+								},
+								"method": "POST",
+								"headers": {
+									"Content-Type": "application/json"
+								},
+								"body": {
+									"value": "{\"Body_Message\":\"The certification for @{item().DisplayName} account in the McKesson TAA Portal expires on @{item().ExpirationDate} and requires your prompt attention. <br/><br/>Please login into the McKesson TAA Portal at https://taaportal.mckesson.com to certify your products soonest. Failure to complete the certification in a timely manner may have an adverse impact on sales of your products to our US Federal Government customers. If you need assistance or have additional questions, you may review the TAA Portal Help/FAQ and Contact Us pages.\",\n\"Ingestion_Layer\":\"CERT_EXPIRATION\",\n\"Primary_Name\":\"@{item().PrimaryName}\",\n\"Primary_Emails\":\"@{item().PrimaryEmail}\",\n\"Recipient_Emails\":\"@{item().EmailAddress}\",\n\"Display_Name\":\"@{item().DisplayName}\",\n\"Subject_Message\":\"McKesson TAA Portal – Annual Recertification\"}",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"TAA_Send_Email_URL": {
+				"type": "string",
+				"defaultValue": "https://prod-104.westus.logic.azure.com:443/workflows/b1682dc3cf894db0bd371db2c867d612/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Qib8no95bsE7mUtWHaMLzOGcnNfrKvPxijW8-36G6s4"
+			}
+		},
+		"variables": {
+			"Taa_Envt": {
+				"type": "String"
+			},
+			"Azure_Secrt": {
+				"type": "String"
+			},
+			"Logic_App_Url": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "Prod_Exp_or_New_Prod_Addn_Alert_Email"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-07-20T09:36:39Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

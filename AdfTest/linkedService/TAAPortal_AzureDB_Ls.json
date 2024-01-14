@@ -1,0 +1,69 @@
+{
+	"name": "TAAPortal_AzureDB_Ls",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"parameters": {
+			"TAA_KeyVault_Nm": {
+				"type": "string",
+				"defaultValue": "kv-taa-dev"
+			},
+			"TAA_adfSpId": {
+				"type": "string",
+				"defaultValue": "3e762ac9-c2e7-402e-b610-d00705d80dff"
+			},
+			"TAA_adfSpScrtNm": {
+				"type": "string",
+				"defaultValue": "TAA-adfSp-Scrt"
+			},
+			"TAA_dbConnStrScrt": {
+				"type": "string",
+				"defaultValue": "TAADBCONSTR"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlDatabase",
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "TAAPortal_KeyVault_Ls",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"TAA_KeyVault_Nm": {
+							"value": "@linkedService().TAA_KeyVault_Nm",
+							"type": "Expression"
+						}
+					}
+				},
+				"secretName": {
+					"value": "@linkedService().TAA_dbConnStrScrt",
+					"type": "Expression"
+				}
+			},
+			"servicePrincipalId": "@{linkedService().TAA_adfSpId}",
+			"servicePrincipalKey": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "TAAPortal_KeyVault_Ls",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"TAA_KeyVault_Nm": {
+							"value": "@linkedService().TAA_KeyVault_Nm",
+							"type": "Expression"
+						}
+					}
+				},
+				"secretName": {
+					"value": "@linkedService().TAA_adfSpScrtNm",
+					"type": "Expression"
+				}
+			},
+			"tenant": "da67ef1b-ca59-4db2-9a8c-aa8d94617a16",
+			"azureCloudType": "AzurePublic"
+		},
+		"connectVia": {
+			"referenceName": "taaportal-dev-shir-link",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

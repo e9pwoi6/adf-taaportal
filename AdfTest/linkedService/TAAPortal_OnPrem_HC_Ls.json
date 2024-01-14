@@ -1,0 +1,16 @@
+{
+	"name": "TAAPortal_OnPrem_HC_Ls",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "integrated security=False;data source=CCTAAP-004;initial catalog=TAAPortal;user id=SPDevTCS",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIzZWZkMzRiNS03ZmY4LTQwZmQtODM4Ny0wY2U2MzRhMjMzMGQiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "taaportal-dev-shir-link",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
