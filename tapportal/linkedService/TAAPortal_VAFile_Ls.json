@@ -1,0 +1,48 @@
+{
+	"name": "TAAPortal_VAFile_Ls",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"parameters": {
+			"TAA_Srvc_Acct_email": {
+				"type": "string",
+				"defaultValue": "d12hsln@mckesson.com"
+			},
+			"TAA_File_Location": {
+				"type": "string",
+				"defaultValue": "\\\\ddcfas62201v1.na.corp.mckesson.com\\cont$\\Npc\\Veterans Affairs (VA)\\FSS Files\\FSS DownloadsTest\\2014 Auto Upload FSS"
+			},
+			"TAA_KeyVault_Nm": {
+				"type": "string",
+				"defaultValue": "kv-taa-dev"
+			},
+			"TAA_VAScrt_Nm": {
+				"type": "string",
+				"defaultValue": "TAASrvc-Acct-PWD-DEV"
+			}
+		},
+		"annotations": [],
+		"type": "FileServer",
+		"typeProperties": {
+			"host": "@{linkedService().TAA_File_Location}",
+			"userId": "@{linkedService().TAA_Srvc_Acct_email}",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "TAAPortal_KeyVault_Ls",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"TAA_KeyVault_Nm": "@linkedService().TAA_KeyVault_Nm"
+					}
+				},
+				"secretName": {
+					"value": "@linkedService().TAA_VAScrt_Nm",
+					"type": "Expression"
+				}
+			}
+		},
+		"connectVia": {
+			"referenceName": "taaportal-dev-shir-link",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

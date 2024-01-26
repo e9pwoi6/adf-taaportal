@@ -1,0 +1,96 @@
+{
+	"name": "Pl_Order_Of_SPs_Execution",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEach_Activity",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup_for_SP",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup_for_SP').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "OrderOfExec_SPs",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": {
+									"value": "@concat(item().TGT_SCHEMA_NM,'.',item().TGT_TABLE_NM)",
+									"type": "Expression"
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "TAAPortal_AzureDB_Ls",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Lookup_for_SP",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT TGT_SCHEMA_NM,TGT_TABLE_NM,LOAD_TYPE,SRC_TYPE,TGT_KEYVAULT_NM FROM DBO.INGESTION_METADATA WHERE INGESTION_FLAG='Y' and SRC_TYPE='Azure SQL DB' ORDER BY EXEC_SEQUENCE",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "TAAPortal_AzureDB_Ds",
+						"type": "DatasetReference",
+						"parameters": {
+							"TAA_Tgt_Schema": "dbo",
+							"TAA_Tgt_Tbl_Nm": "Batch_Job_Activity_Audit"
+						}
+					},
+					"firstRowOnly": false
+				}
+			}
+		],
+		"variables": {
+			"Taa_Enmt": {
+				"type": "String"
+			},
+			"Azure_Secret": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "SPs_Execution_In_Sequence"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-07-20T09:36:39Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

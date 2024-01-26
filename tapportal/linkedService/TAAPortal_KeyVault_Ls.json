@@ -1,0 +1,16 @@
+{
+	"name": "TAAPortal_KeyVault_Ls",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"parameters": {
+			"TAA_KeyVault_Nm": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "@{concat('https://',linkedService().TAA_KeyVault_Nm,'.vault.azure.net/')}"
+		}
+	}
+}

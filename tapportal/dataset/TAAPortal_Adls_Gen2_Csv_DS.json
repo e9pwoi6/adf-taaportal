@@ -1,0 +1,50 @@
+{
+	"name": "TAAPortal_Adls_Gen2_Csv_DS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "TAAPortal_ADLS_Gen2_Ls",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"container_nm": {
+				"type": "string"
+			},
+			"folder_nm": {
+				"type": "string"
+			},
+			"file_nm": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@dataset().file_nm",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "@dataset().folder_nm",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "@dataset().container_nm",
+					"type": "Expression"
+				}
+			},
+			"columnDelimiter": "\t",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"name": "NDC_1\tNDC_2\tNDC_3\tPackageDescription\tTradeName\tPrice\tFSS\tBig4\tVA\tBOP\tHHS\tIHS\tDIHS\tSVH\tSVH1\tSVH2\tIHS2\tDOD\tPHS\tUSCG\tTMOP\tCMOP\tNIH\tFHCC\tCovered\tVendorName\tContractNumber\tParentContractNumber\tDocumentType\tPriceStartDate\tPriceStopDate\tPrimeVendor\tPassThrough\tVAClass\tDiscontinuationDate\tDiscontinuationEnteredDate\tLastModificationDate",
+				"type": "String"
+			}
+		]
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,39 @@
+{
+	"name": "TAAPortal_Datalake_Gen2_Ls",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"parameters": {
+			"Storage_Accnt_Nm": {
+				"type": "string"
+			},
+			"KeyVault_Nm": {
+				"type": "string"
+			},
+			"Secret_Nm": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureBlobFS",
+		"typeProperties": {
+			"url": "@{concat('https://',linkedService().Storage_Accnt_Nm,'.dfs.core.windows.net/')}",
+			"accountKey": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "TAAPortal_KeyVault_Ls",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"TAA_KeyVault_Nm": {
+							"value": "@linkedService().KeyVault_Nm",
+							"type": "Expression"
+						}
+					}
+				},
+				"secretName": {
+					"value": "@linkedService().Secret_Nm",
+					"type": "Expression"
+				}
+			}
+		}
+	}
+}

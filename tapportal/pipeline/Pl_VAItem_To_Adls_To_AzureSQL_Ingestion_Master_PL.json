@@ -1,0 +1,174 @@
+{
+	"name": "Pl_VAItem_To_Adls_To_AzureSQL_Ingestion_Master_PL",
+	"properties": {
+		"description": "Getting environment from pipeline name",
+		"activities": [
+			{
+				"name": "Lookup_Failure",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "select count(*) as cnt from dbo.Batch_Job_Activity_Audit where batch_id=(select max(isnull(batch_id,0)) from dbo.Batch_Job_Activity_Audit) and status='FAILED' and LOAD_TYPE='DAILY' and SRC_TYPE='FILE SERVER'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "TAAPortal_AzureDB_Ds",
+						"type": "DatasetReference",
+						"parameters": {
+							"TAA_Tgt_Schema": "dbo",
+							"TAA_Tgt_Tbl_Nm": "BATCH_JOB_ACTIVITY_AUDIT"
+						}
+					}
+				}
+			},
+			{
+				"name": "If_Failure_cnt-GrterOrEqual",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Lookup_Failure",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@greaterOrEquals(activity('Lookup_Failure').output.firstRow.cnt,1)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Execute_BatchLoad_PL",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Pl_VAItem_To_dls_To_AzureSQL_Ingestion_Load",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Execute_Batch_Rerun_PL",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "Send_Mail_On_FILESERVER_Daily_Load_Failure_Batch_Rerun",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "Pl_VAItem_To_dls_To_AzureSQL_Ingestion_Batch_Rerun_Load",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"Environment_Taa": {
+										"value": "@variables('TAAPortal_Environment')",
+										"type": "Expression"
+									},
+									"Azure_Secret_Key": {
+										"value": "@variables('TAA_Azure_Secret')",
+										"type": "Expression"
+									},
+									"Logic_App_URl": {
+										"value": "@variables('TAA_Portal_Logic_App_url')",
+										"type": "Expression"
+									},
+									"Recipient_Email_ID": {
+										"value": "@variables('Recipient_email_ID')",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "Send_Mail_On_FILESERVER_Daily_Load_Failure_Batch_Rerun",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": {
+									"value": "@pipeline().parameters.TAA_Send_Email_URL",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{\"Body_Message\":\"File Server Daily Ingestion is holding failure batch run's for previous batch_id and we are proceedings to re-run the failure batch runs.\",\n\"Ingestion_Layer\":\"SRC-TGT\",\n\"Recipient_Emails\":\"@{pipeline().parameters.TAA_Support_Mailbox}\",\n\"Subject_Message\":\"File Server Daily Ingestion failure batch re-run\"}",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"TAA_Send_Email_URL": {
+				"type": "string",
+				"defaultValue": "https://prod-104.westus.logic.azure.com:443/workflows/b1682dc3cf894db0bd371db2c867d612/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Qib8no95bsE7mUtWHaMLzOGcnNfrKvPxijW8-36G6s4"
+			},
+			"TAA_Support_Mailbox": {
+				"type": "string",
+				"defaultValue": "taaportalsupport@mckesson.com"
+			}
+		},
+		"variables": {
+			"TAAPortal_Environment": {
+				"type": "String"
+			},
+			"TAA_Azure_Secret": {
+				"type": "String"
+			},
+			"TAA_Portal_Logic_App_url": {
+				"type": "String"
+			},
+			"Recipient_email_ID": {
+				"type": "String"
+			},
+			"Taa_Envnmnt": {
+				"type": "String"
+			},
+			"Btch_Id": {
+				"type": "String"
+			},
+			"Set_Query": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "FileServer_To_AzureSQL_Ingestion"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-04-26T18:54:49Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

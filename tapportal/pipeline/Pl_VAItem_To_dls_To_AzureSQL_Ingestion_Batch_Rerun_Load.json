@@ -1,0 +1,867 @@
+{
+	"name": "Pl_VAItem_To_dls_To_AzureSQL_Ingestion_Batch_Rerun_Load",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lkp_Batch_Load",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT \n MTD.SRC_SCHEMA_NM ,MTD.SRC_TABLE_NM ,MTD.SRC_QUERY,MTD.TGT_SCHEMA_NM,MTD.TGT_TABLE_NM,MTD.LOAD_TYPE,MTD.SRC_TYPE,MTD.SRC_KEYVAULT_NM,MTD.TGT_KEYVAULT_NM, BJA.BATCH_ID\n FROM dbo.Ingestion_Metadata MTD\n INNER JOIN \n (SELECT SRC_TBL_NM , TGT_TBL_NM,BATCH_ID FROM DBO.BATCH_JOB_ACTIVITY_AUDIT WHERE  BATCH_ID=(SELECT ISNULL(MAX(BATCH_ID),0) AS BATCH_ID FROM DBO.BATCH_JOB_ACTIVITY_AUDIT WHERE STATUS='FAILED') AND  STATUS='FAILED')BJA\n ON \n concat(MTD.SRC_SCHEMA_NM,'.',MTD.SRC_TABLE_NM)=BJA.SRC_TBL_NM\n AND \n concat(MTD.TGT_SCHEMA_NM,'.',MTD.TGT_TABLE_NM)=BJA.TGT_TBL_NM\n AND  MTD.INGESTION_FLAG='Y' and MTD.LOAD_TYPE='DAILY' and MTD.SRC_TYPE='FILE SERVER' ",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "TAAPortal_AzureDB_Ds",
+						"type": "DatasetReference",
+						"parameters": {
+							"TAA_Tgt_Schema": "dbo",
+							"TAA_Tgt_Tbl_Nm": "BATCH_JOB_ACTIVITY_AUDIT"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Filter_VAAttachement_Files",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Filter_VAAttachement_Files').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Set_Batch_ID",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "Batch_ID",
+								"value": {
+									"value": "@string(activity('Lkp_Batch_Load').output.value[0].BATCH_ID)",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Copy_VAAttachment_Files_To_ADLS",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Set_Batch_ID",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "BinarySource",
+									"storeSettings": {
+										"type": "FileServerReadSettings",
+										"recursive": true,
+										"wildcardFileName": {
+											"value": "@item().name",
+											"type": "Expression"
+										},
+										"deleteFilesAfterCompletion": false
+									},
+									"formatSettings": {
+										"type": "BinaryReadSettings"
+									}
+								},
+								"sink": {
+									"type": "BinarySink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									}
+								},
+								"enableStaging": false
+							},
+							"inputs": [
+								{
+									"referenceName": "TAAPortal_FileServer_Ds",
+									"type": "DatasetReference"
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "TAAPortal_Adls_Binary_Ds",
+									"type": "DatasetReference",
+									"parameters": {
+										"Container_Nm": "va-files",
+										"Folder_Path": {
+											"value": "@formatDateTime(utcNow(),'yyyy/MM/dd')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Copy_VAAttachement_Data_To_Azure_Staging_Table",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Lkp_Stg_Load",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "DelimitedTextSource",
+									"additionalColumns": [
+										{
+											"name": "Files",
+											"value": {
+												"value": "@item().name",
+												"type": "Expression"
+											}
+										},
+										{
+											"name": "FileDate",
+											"value": {
+												"value": "@activity('Get_LastModified_Date').output.lastModified",
+												"type": "Expression"
+											}
+										}
+									],
+									"storeSettings": {
+										"type": "AzureBlobFSReadSettings",
+										"recursive": true,
+										"wildcardFileName": {
+											"value": "@item().name",
+											"type": "Expression"
+										},
+										"enablePartitionDiscovery": false
+									},
+									"formatSettings": {
+										"type": "DelimitedTextReadSettings"
+									}
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"preCopyScript": {
+										"value": "@{concat('Delete from ',activity('Lkp_Batch_Load').output.value[0].TGT_SCHEMA_NM,'.',activity('Lkp_Batch_Load').output.value[0].TGT_TABLE_NM)}",
+										"type": "Expression"
+									},
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "TAAPortal_Adls_Gen2_Csv_DS",
+									"type": "DatasetReference",
+									"parameters": {
+										"container_nm": "va-files",
+										"folder_nm": {
+											"value": "@formatDateTime(utcNow(),'yyyy/MM/dd')",
+											"type": "Expression"
+										},
+										"file_nm": {
+											"value": "@item().name",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "TAAPortal_AzureDB_Ds",
+									"type": "DatasetReference",
+									"parameters": {
+										"TAA_Tgt_Schema": {
+											"value": "@activity('Lkp_Stg_Load').output.value[0].TGT_SCHEMA_NM",
+											"type": "Expression"
+										},
+										"TAA_Tgt_Tbl_Nm": {
+											"value": "@activity('Lkp_Stg_Load').output.value[0].TGT_TABLE_NM",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Lkp_Batch_Load_copy",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "Copy_VAAttachement_Data_To_Azure_Staging_Table",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 3,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": "SELECT SRC_SCHEMA_NM ,SRC_TABLE_NM ,SRC_QUERY,TGT_SCHEMA_NM,TGT_TABLE_NM,LOAD_TYPE,SRC_TYPE,SRC_KEYVAULT_NM,TGT_KEYVAULT_NM FROM DBO.INGESTION_METADATA WHERE INGESTION_FLAG='Y' and SRC_TYPE='FILE SERVER' and SRC_QUERY IS NOT NULL",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "TAAPortal_AzureDB_Ds",
+									"type": "DatasetReference",
+									"parameters": {
+										"TAA_Tgt_Schema": "dbo",
+										"TAA_Tgt_Tbl_Nm": "BATCH_JOB_ACTIVITY_AUDIT"
+									}
+								},
+								"firstRowOnly": false
+							}
+						},
+						{
+							"name": "Set_Query",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Lkp_Batch_Load_copy",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "Set_Query",
+								"value": {
+									"value": "@activity('Lkp_Batch_Load_copy').output.value[0].SRC_QUERY",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Copy_VAAttachment_Data_To_Azure_TargetTable",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Set_Query",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "@trim(variables('Set_Query'))",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"preCopyScript": {
+										"value": "@{concat('Delete From ',activity('Lkp_Batch_Load_copy').output.value[0].TGT_SCHEMA_NM,'.',activity('Lkp_Batch_Load_copy').output.value[0].TGT_TABLE_NM)}",
+										"type": "Expression"
+									},
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": false,
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "TAAPortal_AzureDB_Ds",
+									"type": "DatasetReference",
+									"parameters": {
+										"TAA_Tgt_Schema": {
+											"value": "@activity('Lkp_Batch_Load_copy').output.value[0].SRC_SCHEMA_NM",
+											"type": "Expression"
+										},
+										"TAA_Tgt_Tbl_Nm": {
+											"value": "@activity('Lkp_Batch_Load_copy').output.value[0].SRC_TABLE_NM",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "TAAPortal_AzureDB_Ds",
+									"type": "DatasetReference",
+									"parameters": {
+										"TAA_Tgt_Schema": {
+											"value": "@activity('Lkp_Batch_Load_copy').output.value[0].TGT_SCHEMA_NM",
+											"type": "Expression"
+										},
+										"TAA_Tgt_Tbl_Nm": {
+											"value": "@activity('Lkp_Batch_Load_copy').output.value[0].TGT_TABLE_NM",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Succeded_Stored_Proc",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Copy_VAAttachment_Data_To_Azure_TargetTable",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[SP_GENERIC_SRC_TO_TGT_ADT_INS]",
+								"storedProcedureParameters": {
+									"BATCH_ID": {
+										"value": {
+											"value": "@int(variables('Batch_ID'))",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"END_TIME": {
+										"value": {
+											"value": "@formatDateTime(utcNow(),'yyyy-MM-dd HH:mm:ss')",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"ERROR_MSG": {
+										"value": null,
+										"type": "String"
+									},
+									"INGESTION_TYPE": {
+										"value": "FILE SERVER",
+										"type": "String"
+									},
+									"LAYER": {
+										"value": "SRC-TGT",
+										"type": "String"
+									},
+									"LOAD_TYPE": {
+										"value": "DAILY",
+										"type": "String"
+									},
+									"SRC_FILE_CNT": {
+										"value": {
+											"value": "@activity('Filter_VAAttachement_Files').output.FilteredItemsCount",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"SRC_FILE_NAME": {
+										"value": {
+											"value": "@item().name",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"SRC_FILE_NM": {
+										"value": null,
+										"type": "String"
+									},
+									"SRC_TBL_COUNT": {
+										"value": {
+											"value": "@activity('Copy_VAAttachment_Data_To_Azure_TargetTable').output.rowsRead",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"SRC_TBL_NM": {
+										"value": {
+											"value": "@concat(activity('Lkp_Batch_Load_copy').output.value[0].SRC_SCHEMA_NM,'.',activity('Lkp_Batch_Load_copy').output.value[0].SRC_TABLE_NM)",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"SRC_TYPE": {
+										"value": "FILE SERVER",
+										"type": "String"
+									},
+									"START_TIME": {
+										"value": {
+											"value": "@formatDateTime(activity('Copy_VAAttachment_Data_To_Azure_TargetTable').output.executiondetails[0].start, 'yyyy-MM-dd HH:mm:ss')",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"STATUS": {
+										"value": "SUCCEEDED",
+										"type": "String"
+									},
+									"TGT_FILE_CNT": {
+										"value": null,
+										"type": "Int64"
+									},
+									"TGT_FILE_NAME": {
+										"value": null,
+										"type": "String"
+									},
+									"TGT_TBL_COUNT": {
+										"value": {
+											"value": "@activity('Copy_VAAttachment_Data_To_Azure_TargetTable').output.rowsCopied",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"TGT_TBL_NM": {
+										"value": {
+											"value": "@concat(activity('Lkp_Batch_Load_copy').output.value[0].TGT_SCHEMA_NM,'.',activity('Lkp_Batch_Load_copy').output.value[0].TGT_TABLE_NM)",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "TAAPortal_AzureDB_Ls",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Failed_Stored_Proc",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Copy_VAAttachment_Data_To_Azure_TargetTable",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[SP_GENERIC_SRC_TO_TGT_ADT_INS]",
+								"storedProcedureParameters": {
+									"BATCH_ID": {
+										"value": {
+											"value": "@int(variables('Batch_ID'))",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"END_TIME": {
+										"value": {
+											"value": "@formatDateTime(utcNow(),'yyyy-MM-dd HH:mm:ss')",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"ERROR_MSG": {
+										"value": {
+											"value": "@activity('Copy_VAAttachment_Data_To_Azure_TargetTable').output.errors[0].Message",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"INGESTION_TYPE": {
+										"value": "FILE SERVER",
+										"type": "String"
+									},
+									"LAYER": {
+										"value": "SRC-TGT",
+										"type": "String"
+									},
+									"LOAD_TYPE": {
+										"value": "DAILY",
+										"type": "String"
+									},
+									"SRC_FILE_CNT": {
+										"value": {
+											"value": "@activity('Filter_VAAttachement_Files').output.FilteredItemsCount",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"SRC_FILE_NAME": {
+										"value": {
+											"value": "@item().name",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"SRC_FILE_NM": {
+										"value": null,
+										"type": "String"
+									},
+									"SRC_TBL_COUNT": {
+										"value": null,
+										"type": "Int64"
+									},
+									"SRC_TBL_NM": {
+										"value": {
+											"value": "@concat(activity('Lkp_Batch_Load_copy').output.value[0].SRC_SCHEMA_NM,'.',activity('Lkp_Batch_Load_copy').output.value[0].SRC_TABLE_NM)",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"SRC_TYPE": {
+										"value": "FILE SERVER",
+										"type": "String"
+									},
+									"START_TIME": {
+										"value": {
+											"value": "@formatDateTime(activity('Copy_VAAttachment_Data_To_Azure_TargetTable').output.executiondetails[0].start, 'yyyy-MM-dd HH:mm:ss')",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"STATUS": {
+										"value": "FAILED",
+										"type": "String"
+									},
+									"TGT_FILE_CNT": {
+										"value": null,
+										"type": "Int64"
+									},
+									"TGT_FILE_NAME": {
+										"value": null,
+										"type": "String"
+									},
+									"TGT_TBL_COUNT": {
+										"value": null,
+										"type": "Int64"
+									},
+									"TGT_TBL_NM": {
+										"value": {
+											"value": "@concat(activity('Lkp_Batch_Load_copy').output.value[0].TGT_SCHEMA_NM,'.',activity('Lkp_Batch_Load_copy').output.value[0].TGT_TABLE_NM)",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "TAAPortal_AzureDB_Ls",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Send_Mail_On_FILE_SERVER_Daily_Load_Success",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "Succeded_Stored_Proc",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": {
+									"value": "@pipeline().parameters.TAA_Send_Email_URL",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{\"Body_Message\":\"File Server Daily load Ingestion for @{activity('Lkp_Batch_Load_copy').output.value[0].TGT_SCHEMA_NM}.@{activity('Lkp_Batch_Load_copy').output.value[0].TGT_TABLE_NM} has been ingested successfully with Source Count: @{activity('Copy_VAAttachment_Data_To_Azure_TargetTable').output.rowsRead} and Target Count: @{activity('Copy_VAAttachment_Data_To_Azure_TargetTable').output.rowsCopied} for BatchID @{int(variables('Batch_ID'))}\",\n\"Ingestion_Layer\":\"SRC-TGT\",\n\"Recipient_Emails\":\"@{pipeline().parameters.TAA_Support_Mailbox}\",\n\"Subject_Message\":\"File Server load For @{activity('Lkp_Batch_Load_copy').output.value[0].TGT_SCHEMA_NM}.@{activity('Lkp_Batch_Load_copy').output.value[0].TGT_TABLE_NM} Table Status\"}",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Send_Mail_On_FILE_SERVER_Daily_Load_Failure",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "Failed_Stored_Proc",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": {
+									"value": "@pipeline().parameters.TAA_Send_Email_URL",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{\"Body_Message\":\"File Server Daily load Ingestion for @{activity('Lkp_Batch_Load_copy').output.value[0].TGT_SCHEMA_NM}.@{activity('Lkp_Batch_Load_copy').output.value[0].TGT_TABLE_NM} has been Failed with error Message: @{activity('Copy_VAAttachment_Data_To_Azure_TargetTable').output.errors[0].Message} for BatchID @{int(variables('Batch_ID'))}\",\n\"Ingestion_Layer\":\"SRC-TGT\",\n\"Recipient_Emails\":\"@{pipeline().parameters.TAA_Support_Mailbox}\",\n\"Subject_Message\":\"File Server load For @{activity('Lkp_Batch_Load_copy').output.value[0].TGT_SCHEMA_NM}.@{activity('Lkp_Batch_Load_copy').output.value[0].TGT_TABLE_NM} Table Status\"}",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Lkp_Stg_Load",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "Copy_VAAttachment_Files_To_ADLS",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 3,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": "SELECT SRC_SCHEMA_NM ,SRC_TABLE_NM ,SRC_QUERY,TGT_SCHEMA_NM,TGT_TABLE_NM,LOAD_TYPE,SRC_TYPE,SRC_KEYVAULT_NM,TGT_KEYVAULT_NM FROM DBO.INGESTION_METADATA WHERE INGESTION_FLAG='Y' and SRC_TYPE='FILE SERVER' and SRC_QUERY IS NULL",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "TAAPortal_AzureDB_Ds",
+									"type": "DatasetReference",
+									"parameters": {
+										"TAA_Tgt_Schema": "dbo",
+										"TAA_Tgt_Tbl_Nm": "BATCH_JOB_ACTIVITY_AUDIT"
+									}
+								},
+								"firstRowOnly": false
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Get_LastModified_Date",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "Lkp_Batch_Load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "TAAPortal_FileServer_Ds",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"lastModified"
+					],
+					"storeSettings": {
+						"type": "FileServerReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Get_FileNames",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "Get_LastModified_Date",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "TAAPortal_FileServer_Ds",
+						"type": "DatasetReference"
+					},
+					"fieldList": [
+						"childItems"
+					],
+					"storeSettings": {
+						"type": "FileServerReadSettings",
+						"recursive": true,
+						"modifiedDatetimeStart": {
+							"value": "@formatDateTime(activity('Get_LastModified_Date').output.lastModified,'yyyy-MM-dd')",
+							"type": "Expression"
+						},
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "BinaryReadSettings"
+					}
+				}
+			},
+			{
+				"name": "Filter_VAAttachement_Files",
+				"type": "Filter",
+				"dependsOn": [
+					{
+						"activity": "Get_FileNames",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Get_FileNames').output.childItems",
+						"type": "Expression"
+					},
+					"condition": {
+						"value": "@startswith(item().name,'XFFSBIG4_Full')",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"TAA_Support_Mailbox": {
+				"type": "string",
+				"defaultValue": "taaportalsupport@mckesson.com"
+			},
+			"TAA_Send_Email_URL": {
+				"type": "string",
+				"defaultValue": "https://prod-104.westus.logic.azure.com:443/workflows/b1682dc3cf894db0bd371db2c867d612/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Qib8no95bsE7mUtWHaMLzOGcnNfrKvPxijW8-36G6s4"
+			}
+		},
+		"variables": {
+			"Environment": {
+				"type": "String"
+			},
+			"Batch_ID": {
+				"type": "String"
+			},
+			"Set_Query": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "FileServer_To_AzureSQL_Ingestion"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-07-20T09:36:39Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

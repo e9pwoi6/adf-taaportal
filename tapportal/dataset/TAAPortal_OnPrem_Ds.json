@@ -1,0 +1,40 @@
+{
+	"name": "TAAPortal_OnPrem_Ds",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "TAAPortal_OnPrem_Ls",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"TAA_Secret_Nm": {
+					"value": "@dataset().TAA_Secret_Nm",
+					"type": "Expression"
+				}
+			}
+		},
+		"parameters": {
+			"TAA_Src_Schema": {
+				"type": "string"
+			},
+			"TAA_Src_Tbl_Nm": {
+				"type": "string"
+			},
+			"TAA_Secret_Nm": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().TAA_Src_Schema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().TAA_Src_Tbl_Nm",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

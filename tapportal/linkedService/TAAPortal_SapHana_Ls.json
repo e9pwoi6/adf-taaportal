@@ -1,0 +1,40 @@
+{
+	"name": "TAAPortal_SapHana_Ls",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"type": "SapHana",
+		"parameters": {
+			"TAA_KeyVault_Nm": {
+				"type": "string",
+				"defaultValue": "kv-taa-dev"
+			},
+			"TAA_Secret_Nm": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"typeProperties": {
+			"connectionString": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "TAAPortal_KeyVault_Ls",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"TAA_KeyVault_Nm": {
+							"value": "@linkedService().TAA_KeyVault_Nm",
+							"type": "Expression"
+						}
+					}
+				},
+				"secretName": {
+					"value": "@linkedService().TAA_Secret_Nm",
+					"type": "Expression"
+				}
+			}
+		},
+		"connectVia": {
+			"referenceName": "taaportal-dev-shir-link",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}

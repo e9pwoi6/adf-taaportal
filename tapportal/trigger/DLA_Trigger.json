@@ -1,0 +1,25 @@
+{
+	"name": "DLA_Trigger",
+	"properties": {
+		"description": "Triggers DLA pipeline ",
+		"annotations": [],
+		"runtimeState": "Stopped",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "DLA_Sync",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Minute",
+				"interval": 60,
+				"startTime": "2023-08-08T16:32:00Z",
+				"timeZone": "UTC"
+			}
+		}
+	}
+}

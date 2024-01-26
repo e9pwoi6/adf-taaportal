@@ -1,0 +1,25 @@
+{
+	"name": "Tgr_For_SAP_HANA",
+	"properties": {
+		"description": "Occurs every day at 2:00:00 AM. Schedule will be used starting on 04/11/2023.",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "Pl_SAPHANA_To_AzureSQL_Daily_Load_Master_Pipe",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-04-11T02:05:00",
+				"timeZone": "Pacific Standard Time"
+			}
+		}
+	}
+}

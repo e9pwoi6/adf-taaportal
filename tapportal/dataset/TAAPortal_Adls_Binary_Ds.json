@@ -1,0 +1,33 @@
+{
+	"name": "TAAPortal_Adls_Binary_Ds",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "TAAPortal_ADLS_Gen2_Ls",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Container_Nm": {
+				"type": "string"
+			},
+			"Folder_Path": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"folderPath": {
+					"value": "@dataset().Folder_Path",
+					"type": "Expression"
+				},
+				"fileSystem": {
+					"value": "@dataset().Container_Nm",
+					"type": "Expression"
+				}
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

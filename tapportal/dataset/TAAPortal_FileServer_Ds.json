@@ -1,0 +1,22 @@
+{
+	"name": "TAAPortal_FileServer_Ds",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "TAAPortal_VAFile_Ls",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"TAA_Srvc_Acct_email": "d12hsln@mckesson.com",
+				"TAA_File_Location": "\\\\ddcfas62201v1.na.corp.mckesson.com\\cont$\\Npc\\Veterans Affairs (VA)\\FSS Files\\FSS DownloadsTest\\2014 Auto Upload FSS",
+				"TAA_KeyVault_Nm": "kv-taa-dev"
+			}
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "FileServerLocation"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

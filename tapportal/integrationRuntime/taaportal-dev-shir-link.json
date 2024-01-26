@@ -1,0 +1,12 @@
+{
+	"name": "taaportal-dev-shir-link",
+	"properties": {
+		"type": "SelfHosted",
+		"typeProperties": {
+			"linkedInfo": {
+				"resourceId": "/subscriptions/a742554b-a5ed-47be-ab05-80056bc08178/resourcegroups/rg-mtgf-common/providers/Microsoft.DataFactory/factories/adf-mtgf-shared/integrationruntimes/MTGF-Shared-SHIR",
+				"authorizationType": "Rbac"
+			}
+		}
+	}
+}

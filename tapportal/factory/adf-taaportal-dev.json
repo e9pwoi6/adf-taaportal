@@ -1,0 +1,14 @@
+{
+	"name": "adf-taaportal-dev",
+	"properties": {
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "true"
+		}
+	},
+	"location": "westus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "da9b8777-49c1-48a6-9e4e-4cf7b00ace5e",
+		"tenantId": "da67ef1b-ca59-4db2-9a8c-aa8d94617a16"
+	}
+}

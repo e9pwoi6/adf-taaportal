@@ -1,0 +1,25 @@
+{
+	"name": "Tgr_For_FileSvr_Ingstn",
+	"properties": {
+		"description": "Occurs every day at 2:00:00 AM. Schedule will be used starting on 04/11/2023.",
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "Pl_VAItem_To_Adls_To_AzureSQL_Ingestion_Master_PL",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2023-04-11T02:05:00",
+				"timeZone": "Pacific Standard Time"
+			}
+		}
+	}
+}

@@ -1,0 +1,37 @@
+{
+	"name": "TAAPortal_AzureDB_Ds",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "TAAPortal_AzureDB_Ls",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"TAA_KeyVault_Nm": "kv-taa-dev",
+				"TAA_adfSpId": "3e762ac9-c2e7-402e-b610-d00705d80dff",
+				"TAA_adfSpScrtNm": "TAA-adfSp-Scrt",
+				"TAA_dbConnStrScrt": "TAADBCONSTR"
+			}
+		},
+		"parameters": {
+			"TAA_Tgt_Schema": {
+				"type": "string"
+			},
+			"TAA_Tgt_Tbl_Nm": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": {
+				"value": "@dataset().TAA_Tgt_Schema",
+				"type": "Expression"
+			},
+			"table": {
+				"value": "@dataset().TAA_Tgt_Tbl_Nm",
+				"type": "Expression"
+			}
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

@@ -1,0 +1,611 @@
+{
+	"name": "Pl_OnPrem_To_AzureSQL_Hist_Batch_Load_Pipe",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lkp_Batch_Load",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Set_Ingestion_Batch_Id",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": " SELECT SRC_SCHEMA_NM ,SRC_TABLE_NM ,SRC_QUERY,TGT_SCHEMA_NM,TGT_TABLE_NM,LOAD_TYPE,SRC_TYPE,SRC_KEYVAULT_NM,TGT_KEYVAULT_NM \r\n FROM DBO.INGESTION_METADATA \r\n WHERE INGESTION_FLAG='Y' \r\n\t   AND LOAD_TYPE='HIST'  \r\n\t   AND SRC_TYPE='SQL ON-PREM'\r\n\t   Order by EXEC_SEQUENCE",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "TAAPortal_AzureDB_Ds",
+						"type": "DatasetReference",
+						"parameters": {
+							"TAA_Tgt_Schema": "dbo",
+							"TAA_Tgt_Tbl_Nm": "BATCH_JOB_ACTIVITY_AUDIT"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach_Hist_Batch_Load_Table",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lkp_Batch_Load",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lkp_Batch_Load').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Set_Src_Query",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"policy": {
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "TAAPortal_Src_Query",
+								"value": {
+									"value": "@item().SRC_QUERY",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Copy_OnPrem_To_Azure_SQL",
+							"type": "Copy",
+							"dependsOn": [
+								{
+									"activity": "Set_Src_Query",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@trim(variables('TAAPortal_Src_Query'))",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "AzureSqlSink",
+									"preCopyScript": {
+										"value": "@{concat('delete from ',item().TGT_SCHEMA_NM,'.',item().TGT_TABLE_NM)}",
+										"type": "Expression"
+									},
+									"writeBehavior": "insert",
+									"sqlWriterUseTableLock": true,
+									"disableMetricsCollection": false
+								},
+								"enableStaging": false,
+								"parallelCopies": 32,
+								"dataIntegrationUnits": 32,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "TAAPortal_OnPrem_Ds",
+									"type": "DatasetReference",
+									"parameters": {
+										"TAA_Src_Schema": {
+											"value": "@item().SRC_SCHEMA_NM",
+											"type": "Expression"
+										},
+										"TAA_Src_Tbl_Nm": {
+											"value": "@item().SRC_TABLE_NM",
+											"type": "Expression"
+										},
+										"TAA_Secret_Nm": {
+											"value": "@item().SRC_KEYVAULT_NM",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "TAAPortal_AzureDB_Ds",
+									"type": "DatasetReference",
+									"parameters": {
+										"TAA_Tgt_Schema": {
+											"value": "@item().TGT_SCHEMA_NM",
+											"type": "Expression"
+										},
+										"TAA_Tgt_Tbl_Nm": {
+											"value": "@item().TGT_TABLE_NM",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "SP_Job_Activity_Audit_Success",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Copy_OnPrem_To_Azure_SQL",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": {
+									"value": "[dbo].[SP_GENERIC_SRC_TO_TGT_ADT_INS]",
+									"type": "Expression"
+								},
+								"storedProcedureParameters": {
+									"END_TIME": {
+										"value": {
+											"value": "@formatDateTime(utcNow(),'yyyy-MM-dd HH:mm:ss')",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"ERROR_MSG": {
+										"value": null,
+										"type": "String"
+									},
+									"LAYER": {
+										"value": "SRC-TGT",
+										"type": "String"
+									},
+									"LOAD_TYPE": {
+										"value": "HIST",
+										"type": "String"
+									},
+									"SRC_FILE_CNT": {
+										"value": null,
+										"type": "Int64"
+									},
+									"SRC_FILE_NAME": {
+										"value": null,
+										"type": "String"
+									},
+									"SRC_FILE_NM": {
+										"value": null,
+										"type": "String"
+									},
+									"SRC_TBL_COUNT": {
+										"value": {
+											"value": "@activity('Copy_OnPrem_To_Azure_SQL').output.rowsRead",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"SRC_TBL_NM": {
+										"value": {
+											"value": "@concat(item().SRC_SCHEMA_NM,'.',item().SRC_TABLE_NM)",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"START_TIME": {
+										"value": {
+											"value": "@formatDateTime(activity('Copy_OnPrem_To_Azure_SQL').output.executionDetails[0].start,'yyyy-MM-dd HH:mm:ss')",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"STATUS": {
+										"value": "SUCCEEDED",
+										"type": "String"
+									},
+									"TGT_FILE_CNT": {
+										"value": null,
+										"type": "Int64"
+									},
+									"TGT_FILE_NAME": {
+										"value": null,
+										"type": "String"
+									},
+									"TGT_TBL_COUNT": {
+										"value": {
+											"value": "@activity('Copy_OnPrem_To_Azure_SQL').output.rowsCopied",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"TGT_TBL_NM": {
+										"value": {
+											"value": "@concat(item().TGT_SCHEMA_NM,'.',item().TGT_TABLE_NM)",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"BATCH_ID": {
+										"value": {
+											"value": "@int(variables('TAAPortal_Batch_Id'))",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"INGESTION_TYPE": {
+										"value": "DB",
+										"type": "String"
+									},
+									"SRC_TYPE": {
+										"value": {
+											"value": "@item().SRC_TYPE",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "TAAPortal_AzureDB_Ls",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"TAA_KeyVault_Nm": "kv-taa-dev",
+									"TAA_adfSpId": "3e762ac9-c2e7-402e-b610-d00705d80dff",
+									"TAA_adfSpScrtNm": "TAA-adfSp-Scrt",
+									"TAA_dbConnStrScrt": "TAADBCONSTR"
+								}
+							}
+						},
+						{
+							"name": "SP_Job_Activity_Audit_Failed",
+							"type": "SqlServerStoredProcedure",
+							"dependsOn": [
+								{
+									"activity": "Copy_OnPrem_To_Azure_SQL",
+									"dependencyConditions": [
+										"Failed"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"storedProcedureName": "[dbo].[SP_GENERIC_SRC_TO_TGT_ADT_INS]",
+								"storedProcedureParameters": {
+									"END_TIME": {
+										"value": {
+											"value": "@formatDateTime(utcNow(),'yyyy-MM-dd HH:mm:ss')",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"ERROR_MSG": {
+										"value": {
+											"value": "@activity('Copy_OnPrem_To_Azure_SQL').output.errors[0].Message",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"LAYER": {
+										"value": "SRC-TGT",
+										"type": "String"
+									},
+									"LOAD_TYPE": {
+										"value": "HIST",
+										"type": "String"
+									},
+									"SRC_FILE_CNT": {
+										"value": null,
+										"type": "Int64"
+									},
+									"SRC_FILE_NAME": {
+										"value": null,
+										"type": "String"
+									},
+									"SRC_FILE_NM": {
+										"value": null,
+										"type": "String"
+									},
+									"SRC_TBL_COUNT": {
+										"value": null,
+										"type": "Int64"
+									},
+									"SRC_TBL_NM": {
+										"value": {
+											"value": "@concat(item().SRC_SCHEMA_NM,'.',item().SRC_TABLE_NM)",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"START_TIME": {
+										"value": {
+											"value": "@formatDateTime(activity('Copy_OnPrem_To_Azure_SQL').output.executionDetails[0].start,'yyyy-MM-dd HH:mm:ss')",
+											"type": "Expression"
+										},
+										"type": "DateTime"
+									},
+									"STATUS": {
+										"value": "FAILED",
+										"type": "String"
+									},
+									"TGT_FILE_CNT": {
+										"value": null,
+										"type": "Int64"
+									},
+									"TGT_FILE_NAME": {
+										"value": null,
+										"type": "String"
+									},
+									"TGT_TBL_COUNT": {
+										"value": null,
+										"type": "Int64"
+									},
+									"TGT_TBL_NM": {
+										"value": {
+											"value": "@concat(item().TGT_SCHEMA_NM,'.',item().TGT_TABLE_NM)",
+											"type": "Expression"
+										},
+										"type": "String"
+									},
+									"BATCH_ID": {
+										"value": {
+											"value": "@int(variables('TAAPortal_Batch_Id'))",
+											"type": "Expression"
+										},
+										"type": "Int64"
+									},
+									"INGESTION_TYPE": {
+										"value": "DB",
+										"type": "String"
+									},
+									"SRC_TYPE": {
+										"value": {
+											"value": "@item().SRC_TYPE",
+											"type": "Expression"
+										},
+										"type": "String"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "TAAPortal_AzureDB_Ls",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"TAA_adfSpId": "3e762ac9-c2e7-402e-b610-d00705d80dff",
+									"TAA_adfSpScrtNm": "TAA-adfSp-Scrt",
+									"TAA_dbConnStrScrt": "TAADBCONSTR"
+								}
+							}
+						},
+						{
+							"name": "Send_Mail_On_Historical_Load_Success",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "SP_Job_Activity_Audit_Success",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": {
+									"value": "@pipeline().parameters.TAA_Send_Email_URL",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{\"Body_Message\":\"Historical Ingestion for @{item().TGT_SCHEMA_NM}.@{item().TGT_TABLE_NM} has been Ingested successfully with Source Count: @{activity('Copy_OnPrem_To_Azure_SQL').output.rowsRead} and Target Count: @{activity('Copy_OnPrem_To_Azure_SQL').output.rowsCopied} for BatchID @{int(variables('TAAPortal_Batch_Id'))}\",\n\"Ingestion_Layer\":\"SRC-TGT\",\n\"Recipient_Emails\":\"@{pipeline().parameters.TAA_Support_Mailbox}\",\n\"Subject_Message\":\"Historical Ingestion For @{item().TGT_SCHEMA_NM}.@{item().TGT_TABLE_NM} Table Status\"}",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Send_Mail_On_Historical_Load_Failure",
+							"type": "WebActivity",
+							"dependsOn": [
+								{
+									"activity": "SP_Job_Activity_Audit_Failed",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": {
+									"value": "@pipeline().parameters.TAA_Send_Email_URL",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{\"Body_Message\":\"Historical Ingestion for @{item().TGT_SCHEMA_NM}.@{item().TGT_TABLE_NM} has been failed with Error Message @{activity('Copy_OnPrem_To_Azure_SQL').output.errors[0].Message} for BatchID @{int(variables('TAAPortal_Batch_Id'))}\",\n\"Ingestion_Layer\":\"SRC-TGT\",\n\"Recipient_Emails\":\"@{pipeline().parameters.TAA_Support_Mailbox}\",\n\"Subject_Message\":\"Historical Ingestion For @{item().TGT_SCHEMA_NM}.@{item().TGT_TABLE_NM} Table Status\"} ",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Cert_Edit",
+							"type": "Script",
+							"dependsOn": [
+								{
+									"activity": "Copy_OnPrem_To_Azure_SQL",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"linkedServiceName": {
+								"referenceName": "TAAPortal_AzureDB_Ls",
+								"type": "LinkedServiceReference",
+								"parameters": {
+									"TAA_KeyVault_Nm": "kv-taa-dev",
+									"TAA_adfSpId": "3e762ac9-c2e7-402e-b610-d00705d80dff",
+									"TAA_adfSpScrtNm": "TAA-adfSp-Scrt",
+									"TAA_dbConnStrScrt": "TAADBCONSTR"
+								}
+							},
+							"typeProperties": {
+								"scripts": [
+									{
+										"type": "Query",
+										"text": "IF not exists(select top 1 1 from data.COOType where COOId=-2 and [Name]='Non Drug Product' and BiGram='X6' and TriGram='STL' and Number=1001 and IsCompliant=0)\r\nbegin\r\n\tINSERT INTO  data.COOType (COOId, Name, BiGram,TriGram,Number,IsCompliant,CreatedDate,LastUpdateDate,LastUpdateUser)\r\n\t\tVALUES (-2, 'Non Drug Product','X6','STL',1001,0,GETUTCDATE(),GETUTCDATE(),null);\r\nend\r\nelse\r\nbegin\r\n\tprint 'Data Already exists';\r\nend\r\n"
+									}
+								],
+								"scriptBlockExecutionTimeout": "02:00:00"
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "Lkp_Ingestion_BatchId",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 3,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": "SELECT ISNULL(MAX(BATCH_ID),0)+1 as BATCH_ID FROM DBO.BATCH_JOB_ACTIVITY_AUDIT  WHERE STATUS='SUCCEEDED'",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "TAAPortal_AzureDB_Ds",
+						"type": "DatasetReference",
+						"parameters": {
+							"TAA_Tgt_Schema": "dbo",
+							"TAA_Tgt_Tbl_Nm": "BATCH_JOB_ACTIVITY_AUDIT"
+						}
+					},
+					"firstRowOnly": true
+				}
+			},
+			{
+				"name": "Set_Ingestion_Batch_Id",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "Lkp_Ingestion_BatchId",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "TAAPortal_Batch_Id",
+					"value": {
+						"value": "@string(activity('Lkp_Ingestion_BatchId').output.firstRow.BATCH_ID)",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"TAA_Send_Email_URL": {
+				"type": "string",
+				"defaultValue": "https://prod-104.westus.logic.azure.com:443/workflows/b1682dc3cf894db0bd371db2c867d612/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Qib8no95bsE7mUtWHaMLzOGcnNfrKvPxijW8-36G6s4"
+			},
+			"TAA_Support_Mailbox": {
+				"type": "string",
+				"defaultValue": "taaportalsupport@mckesson.com"
+			}
+		},
+		"variables": {
+			"TAAPortal_Src_Query": {
+				"type": "String"
+			},
+			"TAAPortal_Batch_Id": {
+				"type": "String"
+			}
+		},
+		"folder": {
+			"name": "OnPrem_To_AzureSQL_Hist_Ingestion"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-08-16T09:45:46Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,85 @@
+{
+	"name": "DLA_Sync",
+	"properties": {
+		"activities": [
+			{
+				"name": "DLA_Sync",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"writeBehavior": "upsert",
+						"upsertSettings": {
+							"useTempDB": true,
+							"keys": [
+								"DLAId"
+							]
+						},
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "TAAPortal_OnPrem_Ds",
+						"type": "DatasetReference",
+						"parameters": {
+							"TAA_Src_Schema": "data",
+							"TAA_Src_Tbl_Nm": "DLA",
+							"TAA_Secret_Nm": "OnPrem-DLA"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "TAAPortal_AzureDB_Ds",
+						"type": "DatasetReference",
+						"parameters": {
+							"TAA_Tgt_Schema": "data",
+							"TAA_Tgt_Tbl_Nm": "DLA"
+						}
+					}
+				]
+			}
+		],
+		"parameters": {
+			"TAA_Send_Email_URL": {
+				"type": "string",
+				"defaultValue": "https://prod-104.westus.logic.azure.com:443/workflows/b1682dc3cf894db0bd371db2c867d612/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Qib8no95bsE7mUtWHaMLzOGcnNfrKvPxijW8-36G6s4"
+			},
+			"TAA_Support_Mailbox": {
+				"type": "string",
+				"defaultValue": "taaportalsupport@mckesson.com"
+			}
+		},
+		"folder": {
+			"name": "DLA_Sync"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-08-10T15:47:34Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

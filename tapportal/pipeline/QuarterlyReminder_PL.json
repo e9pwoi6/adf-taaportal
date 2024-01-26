@@ -1,0 +1,96 @@
+{
+	"name": "QuarterlyReminder_PL",
+	"properties": {
+		"activities": [
+			{
+				"name": "Lkp_Qtly_Rmdr",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[dbo].[spQuarterlyEmail]",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "TAAPortal_AzureDB_Ds",
+						"type": "DatasetReference",
+						"parameters": {
+							"TAA_Tgt_Schema": "dbo",
+							"TAA_Tgt_Tbl_Nm": "Batch_Job_Activity_Audit"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEach",
+				"description": "",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lkp_Qtly_Rmdr",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lkp_Qtly_Rmdr').output.value",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Quarterly_EmailReminder",
+							"type": "WebActivity",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"method": "POST",
+								"url": {
+									"value": "@pipeline().parameters.TAA_Send_Email_URL",
+									"type": "Expression"
+								},
+								"body": {
+									"value": "{\"Body_Message\":\"The @{item().SupplierName} account in the McKesson TAA Portal has items that require certification information, in accordance with guidelines set by 48 CFR 52.225-5 (www.acquisition.gov/far/52.225-5).<br /><br />\nPlease login to the McKesson TAA Portal at https://taaportal.mckesson.com to provide the required information immediately.&nbsp   \nIf you require assistance or have additional questions, please review the Help/FAQ and Contact Us pages in the Supplier Portal.<br /><br />\nAs the Pharmaceutical Prime Vender (PPV) for the U.S. Department of Veterans Affairs (VA) and other Government agencies; henceforth referred collectively as Prime Contracts.&nbsp McKesson is required to obtain information from its Suppliers per the following requirements: <br /><br />\n&nbsp I. &nbsp Certification to McKesson the status of compliance with the Trade Agreements Act (TAA) for all products supplied through government contracts. <br /><br />\n&nbspII. &nbsp Suppliers providing generic products under the VA PPV contract are required to identify and certify to McKesson which of its products meet the following requirements of the Wholesale Acquisition Cost Based Price Generics Program (WPBG):<br /><br /> \n&nbsp a. &nbsp Is a generic pharmaceutical; <br />\n&nbsp b. &nbsp Is approved by the U.S. Food & Drug Administration (FDA); <br />\n&nbsp c. &nbsp Is assigned an FDA-approved National Drug Code (NDC); <br />\n&nbsp d. &nbsp Has a published Wholesale Acquisition Cost (WAC); and <br />\n&nbsp e. &nbsp Is compliant with the Trade Agreements Act by being a designated-country end - product. <br /><br />\nIt is vitally important that McKesson require suppliers to ensure, both at the start of the contract performance \nand on a regular basis throughout the life of the contract, that items offered for sale to the government through McKesson are compliant with the Trade Agreements Act. \nMcKesson has established the McKesson TAA Portal to help our suppliers provide the required information.\nFailure to complete a certification may have an adverse impact on sales of your products until the certification is completed. <br /><br />  \nYour participation in McKesson’s Trade Agreements Act annual certification is important and greatly appreciated.\",\n\"Ingestion_Layer\":\"Quarterly\",\n\"Primary_Emails\":\"@{item().PrimaryEmail}\",\n\"Recipient_Emails\":\"@{item().Recipients}\",\n\"Subject_Message\":\"McKesson TAA Portal – Not Certified Products\"}\n",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"TAA_Send_Email_URL": {
+				"type": "string",
+				"defaultValue": "https://prod-104.westus.logic.azure.com:443/workflows/b1682dc3cf894db0bd371db2c867d612/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=Qib8no95bsE7mUtWHaMLzOGcnNfrKvPxijW8-36G6s4"
+			}
+		},
+		"folder": {
+			"name": "Quarterly_EmailReminder"
+		},
+		"annotations": [],
+		"lastPublishTime": "2023-10-13T11:52:42Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
