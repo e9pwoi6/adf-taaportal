@@ -1,0 +1,117 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "adf-taaportal-dev"
+		},
+		"Allam_Practice_Gen2_accountKey": {
+			"value": ""
+		},
+		"AzureSqlDatabase1_connectionString": {
+			"value": ""
+		},
+		"LS_Blob_Storage_connectionString": {
+			"value": ""
+		},
+		"LS_CCTAAP_006_connectionString": {
+			"value": "Integrated Security=True;Data Source=CCTAAP-006;Initial Catalog=PDW"
+		},
+		"LS_CCTAAP_006_password": {
+			"value": ""
+		},
+		"LS_SFTP_Test_password": {
+			"value": ""
+		},
+		"TAAPortal_OnPrem_HC_Ls_connectionString": {
+			"value": ""
+		},
+		"Test_006_ADF_LS_UI_connectionString": {
+			"value": ""
+		},
+		"Test_006_ADLS_LS_accountKey": {
+			"value": ""
+		},
+		"Test_006_ASQL_TP_LS_connectionString": {
+			"value": ""
+		},
+		"Test_006_M_Dvn_LS_connectionString": {
+			"value": ""
+		},
+		"Test_22feb_ls_ADLS_accountKey": {
+			"value": ""
+		},
+		"Test_B_ADLS_LS_accountKey": {
+			"value": ""
+		},
+		"Test_B_ASQL_LS_connectionString": {
+			"value": ""
+		},
+		"Allam_Practice_Gen2_properties_typeProperties_url": {
+			"value": "@{concat('https://',linkedService().acount_nm,'.dfs.core.windows.net/')}\n"
+		},
+		"LS_CCTAAP_006_properties_typeProperties_userName": {
+			"value": "NAMCK\\S9PWOI6"
+		},
+		"LS_SFTP_Test_properties_typeProperties_host": {
+			"value": "@{linkedService().Host}"
+		},
+		"LS_SFTP_Test_properties_typeProperties_hostKeyFingerprint": {
+			"value": "@{linkedService().SSH}"
+		},
+		"LS_SFTP_Test_properties_typeProperties_userName": {
+			"value": "@{linkedService().UserName}"
+		},
+		"TAAPortal_ADLS_Gen2_Ls_properties_typeProperties_url": {
+			"value": "@{linkedService().TAA_ADSL_URL}"
+		},
+		"TAAPortal_AzureDB_Ls_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().TAA_dbConnStrScrt"
+		},
+		"TAAPortal_AzureDB_Ls_properties_typeProperties_servicePrincipalId": {
+			"value": "@{linkedService().TAA_adfSpId}"
+		},
+		"TAAPortal_AzureDB_Ls_properties_typeProperties_tenant": {
+			"value": "da67ef1b-ca59-4db2-9a8c-aa8d94617a16"
+		},
+		"TAAPortal_Datalake_Gen2_Ls_properties_typeProperties_url": {
+			"value": "@{concat('https://',linkedService().Storage_Accnt_Nm,'.dfs.core.windows.net/')}"
+		},
+		"TAAPortal_KeyVault_Ls_properties_typeProperties_baseUrl": {
+			"value": "@{concat('https://',linkedService().TAA_KeyVault_Nm,'.vault.azure.net/')}"
+		},
+		"TAAPortal_OnPrem_Ls_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().TAA_Secret_Nm"
+		},
+		"TAAPortal_SapHana_Ls_properties_typeProperties_connectionString_secretName": {
+			"value": "@linkedService().TAA_Secret_Nm"
+		},
+		"TAAPortal_VAFile_Ls_properties_typeProperties_host": {
+			"value": "@{linkedService().TAA_File_Location}"
+		},
+		"TAAPortal_VAFile_Ls_properties_typeProperties_userId": {
+			"value": "@{linkedService().TAA_Srvc_Acct_email}"
+		},
+		"Test_006_ADLS_LS_properties_typeProperties_url": {
+			"value": "https://asdltaaportaldev.dfs.core.windows.net/"
+		},
+		"Test_22feb_ls_ADLS_properties_typeProperties_url": {
+			"value": "https://asdltaaportaldev.dfs.core.windows.net/"
+		},
+		"Test_B_ADLS_LS_properties_typeProperties_url": {
+			"value": "https://asdltaaportaldev.dfs.core.windows.net/"
+		},
+		"taaportal-dev-shir-link_properties_typeProperties_linkedInfo_resourceId": {
+			"value": "/subscriptions/a742554b-a5ed-47be-ab05-80056bc08178/resourcegroups/rg-mtgf-common/providers/Microsoft.DataFactory/factories/adf-mtgf-shared/integrationruntimes/MTGF-Shared-SHIR"
+		},
+		"taaportal-nonprod-shir-link_properties_typeProperties_linkedInfo_resourceId": {
+			"value": "/subscriptions/a742554b-a5ed-47be-ab05-80056bc08178/resourcegroups/rg-mtgf-common/providers/Microsoft.DataFactory/factories/adf-mtgf-shared-nonProd/integrationruntimes/MTGF-DEV-Shared-SHIR"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}

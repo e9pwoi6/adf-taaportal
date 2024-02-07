@@ -1,0 +1,321 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adf-taaportal-dev"
+		},
+		"Allam_Practice_Gen2_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'Allam_Practice_Gen2'"
+		},
+		"AzureSqlDatabase1_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase1'"
+		},
+		"LS_Blob_Storage_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_Blob_Storage'"
+		},
+		"LS_CCTAAP_006_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LS_CCTAAP_006'",
+			"defaultValue": "Integrated Security=True;Data Source=CCTAAP-006;Initial Catalog=PDW"
+		},
+		"LS_CCTAAP_006_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_CCTAAP_006'"
+		},
+		"LS_SFTP_Test_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_SFTP_Test'"
+		},
+		"TAAPortal_OnPrem_HC_Ls_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'TAAPortal_OnPrem_HC_Ls'"
+		},
+		"Test_006_ADF_LS_UI_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Test_006_ADF_LS_UI'"
+		},
+		"Test_006_ADLS_LS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'Test_006_ADLS_LS'"
+		},
+		"Test_006_ASQL_TP_LS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Test_006_ASQL_TP_LS'"
+		},
+		"Test_006_M_Dvn_LS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Test_006_M_Dvn_LS'"
+		},
+		"Test_22feb_ls_ADLS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'Test_22feb_ls_ADLS'"
+		},
+		"Test_B_ADLS_LS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'Test_B_ADLS_LS'"
+		},
+		"Test_B_ASQL_LS_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Test_B_ASQL_LS'"
+		},
+		"Allam_Practice_Gen2_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "@{concat('https://',linkedService().acount_nm,'.dfs.core.windows.net/')}\n"
+		},
+		"LS_CCTAAP_006_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "NAMCK\\S9PWOI6"
+		},
+		"LS_SFTP_Test_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "@{linkedService().Host}"
+		},
+		"LS_SFTP_Test_properties_typeProperties_hostKeyFingerprint": {
+			"type": "string",
+			"defaultValue": "@{linkedService().SSH}"
+		},
+		"LS_SFTP_Test_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "@{linkedService().UserName}"
+		},
+		"TAAPortal_ADLS_Gen2_Ls_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "@{linkedService().TAA_ADSL_URL}"
+		},
+		"TAAPortal_AzureDB_Ls_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().TAA_dbConnStrScrt"
+		},
+		"TAAPortal_AzureDB_Ls_properties_typeProperties_servicePrincipalId": {
+			"type": "string",
+			"defaultValue": "@{linkedService().TAA_adfSpId}"
+		},
+		"TAAPortal_AzureDB_Ls_properties_typeProperties_tenant": {
+			"type": "string",
+			"defaultValue": "da67ef1b-ca59-4db2-9a8c-aa8d94617a16"
+		},
+		"TAAPortal_Datalake_Gen2_Ls_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "@{concat('https://',linkedService().Storage_Accnt_Nm,'.dfs.core.windows.net/')}"
+		},
+		"TAAPortal_KeyVault_Ls_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "@{concat('https://',linkedService().TAA_KeyVault_Nm,'.vault.azure.net/')}"
+		},
+		"TAAPortal_OnPrem_Ls_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().TAA_Secret_Nm"
+		},
+		"TAAPortal_SapHana_Ls_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "@linkedService().TAA_Secret_Nm"
+		},
+		"TAAPortal_VAFile_Ls_properties_typeProperties_host": {
+			"type": "string",
+			"defaultValue": "@{linkedService().TAA_File_Location}"
+		},
+		"TAAPortal_VAFile_Ls_properties_typeProperties_userId": {
+			"type": "string",
+			"defaultValue": "@{linkedService().TAA_Srvc_Acct_email}"
+		},
+		"Test_006_ADLS_LS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://asdltaaportaldev.dfs.core.windows.net/"
+		},
+		"Test_22feb_ls_ADLS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://asdltaaportaldev.dfs.core.windows.net/"
+		},
+		"Test_B_ADLS_LS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://asdltaaportaldev.dfs.core.windows.net/"
+		},
+		"taaportal-dev-shir-link_properties_typeProperties_linkedInfo_resourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/a742554b-a5ed-47be-ab05-80056bc08178/resourcegroups/rg-mtgf-common/providers/Microsoft.DataFactory/factories/adf-mtgf-shared/integrationruntimes/MTGF-Shared-SHIR"
+		},
+		"taaportal-nonprod-shir-link_properties_typeProperties_linkedInfo_resourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/a742554b-a5ed-47be-ab05-80056bc08178/resourcegroups/rg-mtgf-common/providers/Microsoft.DataFactory/factories/adf-mtgf-shared-nonProd/integrationruntimes/MTGF-DEV-Shared-SHIR"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "adf-taaportal-dev_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"Allam_Practice_Gen2_accountKey": {
+						"value": "[parameters('Allam_Practice_Gen2_accountKey')]"
+					},
+					"AzureSqlDatabase1_connectionString": {
+						"value": "[parameters('AzureSqlDatabase1_connectionString')]"
+					},
+					"LS_Blob_Storage_connectionString": {
+						"value": "[parameters('LS_Blob_Storage_connectionString')]"
+					},
+					"Test_006_ADF_LS_UI_connectionString": {
+						"value": "[parameters('Test_006_ADF_LS_UI_connectionString')]"
+					},
+					"Test_006_ADLS_LS_accountKey": {
+						"value": "[parameters('Test_006_ADLS_LS_accountKey')]"
+					},
+					"Test_006_ASQL_TP_LS_connectionString": {
+						"value": "[parameters('Test_006_ASQL_TP_LS_connectionString')]"
+					},
+					"Test_006_M_Dvn_LS_connectionString": {
+						"value": "[parameters('Test_006_M_Dvn_LS_connectionString')]"
+					},
+					"Test_22feb_ls_ADLS_accountKey": {
+						"value": "[parameters('Test_22feb_ls_ADLS_accountKey')]"
+					},
+					"Test_B_ADLS_LS_accountKey": {
+						"value": "[parameters('Test_B_ADLS_LS_accountKey')]"
+					},
+					"Test_B_ASQL_LS_connectionString": {
+						"value": "[parameters('Test_B_ASQL_LS_connectionString')]"
+					},
+					"LS_CCTAAP_006_connectionString": {
+						"value": "[parameters('LS_CCTAAP_006_connectionString')]"
+					},
+					"LS_CCTAAP_006_password": {
+						"value": "[parameters('LS_CCTAAP_006_password')]"
+					},
+					"LS_SFTP_Test_password": {
+						"value": "[parameters('LS_SFTP_Test_password')]"
+					},
+					"Allam_Practice_Gen2_properties_typeProperties_url": {
+						"value": "[parameters('Allam_Practice_Gen2_properties_typeProperties_url')]"
+					},
+					"TAAPortal_KeyVault_Ls_properties_typeProperties_baseUrl": {
+						"value": "[parameters('TAAPortal_KeyVault_Ls_properties_typeProperties_baseUrl')]"
+					},
+					"Test_006_ADLS_LS_properties_typeProperties_url": {
+						"value": "[parameters('Test_006_ADLS_LS_properties_typeProperties_url')]"
+					},
+					"Test_22feb_ls_ADLS_properties_typeProperties_url": {
+						"value": "[parameters('Test_22feb_ls_ADLS_properties_typeProperties_url')]"
+					},
+					"Test_B_ADLS_LS_properties_typeProperties_url": {
+						"value": "[parameters('Test_B_ADLS_LS_properties_typeProperties_url')]"
+					},
+					"taaportal-dev-shir-link_properties_typeProperties_linkedInfo_resourceId": {
+						"value": "[parameters('taaportal-dev-shir-link_properties_typeProperties_linkedInfo_resourceId')]"
+					},
+					"taaportal-nonprod-shir-link_properties_typeProperties_linkedInfo_resourceId": {
+						"value": "[parameters('taaportal-nonprod-shir-link_properties_typeProperties_linkedInfo_resourceId')]"
+					},
+					"LS_CCTAAP_006_properties_typeProperties_userName": {
+						"value": "[parameters('LS_CCTAAP_006_properties_typeProperties_userName')]"
+					},
+					"LS_SFTP_Test_properties_typeProperties_host": {
+						"value": "[parameters('LS_SFTP_Test_properties_typeProperties_host')]"
+					},
+					"LS_SFTP_Test_properties_typeProperties_hostKeyFingerprint": {
+						"value": "[parameters('LS_SFTP_Test_properties_typeProperties_hostKeyFingerprint')]"
+					},
+					"LS_SFTP_Test_properties_typeProperties_userName": {
+						"value": "[parameters('LS_SFTP_Test_properties_typeProperties_userName')]"
+					},
+					"TAAPortal_ADLS_Gen2_Ls_properties_typeProperties_url": {
+						"value": "[parameters('TAAPortal_ADLS_Gen2_Ls_properties_typeProperties_url')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "adf-taaportal-dev_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"TAAPortal_OnPrem_HC_Ls_connectionString": {
+						"value": "[parameters('TAAPortal_OnPrem_HC_Ls_connectionString')]"
+					},
+					"TAAPortal_AzureDB_Ls_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('TAAPortal_AzureDB_Ls_properties_typeProperties_connectionString_secretName')]"
+					},
+					"TAAPortal_AzureDB_Ls_properties_typeProperties_servicePrincipalId": {
+						"value": "[parameters('TAAPortal_AzureDB_Ls_properties_typeProperties_servicePrincipalId')]"
+					},
+					"TAAPortal_AzureDB_Ls_properties_typeProperties_tenant": {
+						"value": "[parameters('TAAPortal_AzureDB_Ls_properties_typeProperties_tenant')]"
+					},
+					"TAAPortal_Datalake_Gen2_Ls_properties_typeProperties_url": {
+						"value": "[parameters('TAAPortal_Datalake_Gen2_Ls_properties_typeProperties_url')]"
+					},
+					"TAAPortal_OnPrem_Ls_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('TAAPortal_OnPrem_Ls_properties_typeProperties_connectionString_secretName')]"
+					},
+					"TAAPortal_SapHana_Ls_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('TAAPortal_SapHana_Ls_properties_typeProperties_connectionString_secretName')]"
+					},
+					"TAAPortal_VAFile_Ls_properties_typeProperties_host": {
+						"value": "[parameters('TAAPortal_VAFile_Ls_properties_typeProperties_host')]"
+					},
+					"TAAPortal_VAFile_Ls_properties_typeProperties_userId": {
+						"value": "[parameters('TAAPortal_VAFile_Ls_properties_typeProperties_userId')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'adf-taaportal-dev_ArmTemplate_0')]"
+			]
+		},
+		{
+			"name": "adf-taaportal-dev_ArmTemplate_2",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_2.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'adf-taaportal-dev_ArmTemplate_1')]"
+			]
+		}
+	]
+}
