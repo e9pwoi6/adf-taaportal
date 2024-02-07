@@ -1,0 +1,58 @@
+{
+	"name": "SFTP_Test",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy_To_SFTP_Folder",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "BinarySource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"deleteFilesAfterCompletion": false
+						},
+						"formatSettings": {
+							"type": "BinaryReadSettings"
+						}
+					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "SftpWriteSettings",
+							"operationTimeout": "01:00:00",
+							"useTempFileRename": true
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_Blob_Storage_Test",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_SFTP_Outbound_Test",
+						"type": "DatasetReference",
+						"parameters": {
+							"Directory": "/mckesson2-sftp-us-east-1/mckesson2_to_pramata/mckesson2_to_pramata/Mckesson_to_Pramata_UAT"
+						}
+					}
+				]
+			}
+		],
+		"annotations": []
+	}
+}
