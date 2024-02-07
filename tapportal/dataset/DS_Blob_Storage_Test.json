@@ -1,0 +1,17 @@
+{
+	"name": "DS_Blob_Storage_Test",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_Blob_Storage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Binary",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"container": "varicent-test"
+			}
+		}
+	}
+}
