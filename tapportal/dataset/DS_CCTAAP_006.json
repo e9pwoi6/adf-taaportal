@@ -1,0 +1,51 @@
+{
+	"name": "DS_CCTAAP_006",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_CCTAAP_006",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "PramataNumber",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "CompanyGroupName",
+				"type": "nvarchar"
+			},
+			{
+				"name": "DocumentType",
+				"type": "nvarchar"
+			},
+			{
+				"name": "EffectiveDate",
+				"type": "date"
+			},
+			{
+				"name": "TerminationDate",
+				"type": "date"
+			},
+			{
+				"name": "MCFID",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ParentDocumentID",
+				"type": "nvarchar"
+			},
+			{
+				"name": "DealProfileID",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "vwVaricentDataFeed"
+		}
+	}
+}
