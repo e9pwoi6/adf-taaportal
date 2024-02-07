@@ -38,7 +38,7 @@
 						"storeSettings": {
 							"type": "SftpWriteSettings",
 							"operationTimeout": "01:00:00",
-							"useTempFileRename": true
+							"useTempFileRename": false
 						}
 					},
 					"enableStaging": false
@@ -78,12 +78,25 @@
 						"partitionOption": "None"
 					},
 					"sink": {
-						"type": "BinarySink",
+						"type": "DelimitedTextSink",
 						"storeSettings": {
 							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
 						}
 					},
-					"enableStaging": false
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
 				},
 				"inputs": [
 					{
@@ -93,7 +106,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "DS_Blob_Storage_Test",
+						"referenceName": "DS_Blob_Storage_CSV",
 						"type": "DatasetReference"
 					}
 				]
@@ -122,7 +135,7 @@
 						"referenceName": "DS_Blob_Storage_Test",
 						"type": "DatasetReference"
 					},
-					"enableLogging": true,
+					"enableLogging": false,
 					"storeSettings": {
 						"type": "AzureBlobStorageReadSettings",
 						"recursive": true,
