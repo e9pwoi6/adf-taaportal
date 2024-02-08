@@ -5,8 +5,6 @@
 			{
 				"name": "Copy_To_SFTP_Folder",
 				"type": "Copy",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Copy_Varicent_Data",
@@ -64,6 +62,8 @@
 			{
 				"name": "Copy_Varicent_Data",
 				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -103,8 +103,6 @@
 			{
 				"name": "Clear_Storage",
 				"type": "Delete",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Copy_To_SFTP_Folder",
@@ -124,7 +122,13 @@
 				"typeProperties": {
 					"dataset": {
 						"referenceName": "DS_Blob_Storage_Test",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"Directory": {
+								"value": "@pipeline().parameters.Directory",
+								"type": "Expression"
+							}
+						}
 					},
 					"enableLogging": false,
 					"storeSettings": {
@@ -135,6 +139,12 @@
 				}
 			}
 		],
+		"parameters": {
+			"Directory": {
+				"type": "String",
+				"defaultValue": "/mckesson2-sftp-us-east-1/mckesson2_to_pramata/mckesson2_to_pramata/Mckesson_to_Pramata_UAT"
+			}
+		},
 		"annotations": []
 	}
 }
