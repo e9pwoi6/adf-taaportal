@@ -5,8 +5,6 @@
 			{
 				"name": "Copy_To_SFTP_Folder",
 				"type": "Copy",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Copy_Varicent_Data",
@@ -64,6 +62,8 @@
 			{
 				"name": "Copy_Varicent_Data",
 				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
@@ -116,8 +116,6 @@
 			{
 				"name": "Clear_Storage",
 				"type": "Delete",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Copy_To_SFTP_Folder",
