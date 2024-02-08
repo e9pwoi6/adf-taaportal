@@ -5,12 +5,21 @@
 			"referenceName": "LS_Blob_Storage",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"File Name": {
+				"type": "String",
+				"defaultValue": "'varicent ' + getdate()"
+			}
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "Varicent",
+				"fileName": {
+					"value": "@concat('varicent-test/', formatDateTime(utcNow(), 'yyyy-MM-dd'), '.csv')",
+					"type": "Expression"
+				},
 				"container": "varicent-test"
 			},
 			"columnDelimiter": "|",
