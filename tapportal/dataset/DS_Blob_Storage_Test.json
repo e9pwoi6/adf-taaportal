@@ -5,11 +5,21 @@
 			"referenceName": "LS_Blob_Storage",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"Directory": {
+				"type": "string",
+				"defaultValue": "/mckesson2-sftp-us-east-1/mckesson2_to_pramata/mckesson2_to_pramata/Mckesson_to_Pramata_UAT"
+			}
+		},
 		"annotations": [],
 		"type": "Binary",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "@dataset().Directory",
+					"type": "Expression"
+				},
 				"container": "varicent-test"
 			}
 		}
