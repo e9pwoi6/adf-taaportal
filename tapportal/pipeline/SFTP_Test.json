@@ -54,7 +54,7 @@
 						"referenceName": "DS_SFTP_Outbound_Test",
 						"type": "DatasetReference",
 						"parameters": {
-							"Directory": "/data"
+							"Directory": "/mckesson2-sftp-us-east-1/mckesson2_to_pramata/mckesson2_to_pramata/Mckesson_to_Pramata_UAT"
 						}
 					}
 				]
