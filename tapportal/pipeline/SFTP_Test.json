@@ -111,7 +111,7 @@
 						"referenceName": "DS_Blob_Storage_Test01",
 						"type": "DatasetReference",
 						"parameters": {
-							"File Name": "Varicent"
+							"File Name": "Varicent_Test"
 						}
 					}
 				]
