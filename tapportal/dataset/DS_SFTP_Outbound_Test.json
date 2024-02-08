@@ -13,7 +13,7 @@
 		"parameters": {
 			"Directory": {
 				"type": "string",
-				"defaultValue": "/mckesson2-sftp-us-east-1/mckesson2_to_pramata/mckesson2_to_pramata/Mckesson_to_Pramata_UAT"
+				"defaultValue": "/data"
 			}
 		},
 		"annotations": [],
