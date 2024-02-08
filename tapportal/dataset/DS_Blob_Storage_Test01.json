@@ -10,6 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
+				"fileName": "Varicent",
 				"container": "varicent-test"
 			},
 			"columnDelimiter": "|",
