@@ -17,7 +17,7 @@
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"fileName": {
-					"value": "@concat('varicent-test/', formatDateTime(utcNow(), 'yyyy-MM-dd-mm'), '.csv')",
+					"value": "@concat('varicent-test/', utcNow(), '.csv')",
 					"type": "Expression"
 				},
 				"container": "varicent-test"
