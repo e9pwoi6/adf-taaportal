@@ -5,6 +5,8 @@
 			{
 				"name": "Copy_To_SFTP_Folder",
 				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Copy_Varicent_Data",
@@ -101,6 +103,8 @@
 			{
 				"name": "Clear_Storage",
 				"type": "Delete",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Copy_To_SFTP_Folder",
