@@ -16,10 +16,6 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"folderPath": {
-					"value": "@dataset().Directory",
-					"type": "Expression"
-				},
 				"container": "varicent-test"
 			}
 		}
