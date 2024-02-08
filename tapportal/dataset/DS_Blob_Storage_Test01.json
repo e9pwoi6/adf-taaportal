@@ -17,7 +17,7 @@
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"fileName": {
-					"value": "@concat('Pramata_Test_',formatDateTime(utcNow(), 'MMddyyyy_HHmmss'), '.csv')",
+					"value": "@concat('Pramata_Test_',formatDateTime(utcNow(), 'MMddyyyy_hhmmss'), '.csv')",
 					"type": "Expression"
 				},
 				"container": "varicent-test"
