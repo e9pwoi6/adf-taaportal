@@ -1,0 +1,17 @@
+{
+	"name": "LS_CCTAAP_005",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"connectionString": "integrated security=True;data source=CCTAAP-005;initial catalog=PramataDataWarehouse",
+			"userName": "NAMCK\\s9pwoi6",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI3YjEwODYwMS01YmFmLTRjYjgtYTljOS04ZGIyMmY2Y2JhZDAiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "taaportal-dev-shir-link",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
