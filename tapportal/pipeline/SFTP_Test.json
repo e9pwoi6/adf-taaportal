@@ -40,7 +40,7 @@
 						"referenceName": "DS_Blob_Storage_Test",
 						"type": "DatasetReference",
 						"parameters": {
-							"Directory": "/mckesson2-sftp-us-east-1/mckesson2_to_pramata/mckesson2_to_pramata/Mckesson_to_Pramata_UAT"
+							"Directory": "/Data"
 						}
 					}
 				]
