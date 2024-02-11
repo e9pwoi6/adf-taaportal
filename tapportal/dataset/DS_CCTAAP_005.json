@@ -2,7 +2,7 @@
 	"name": "DS_CCTAAP_005",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "LS_CCTAAP_006",
+			"referenceName": "LS_CCTAAP_005",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],
