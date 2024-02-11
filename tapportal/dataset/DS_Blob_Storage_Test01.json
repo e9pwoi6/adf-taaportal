@@ -5,21 +5,11 @@
 			"referenceName": "LS_Blob_Storage",
 			"type": "LinkedServiceReference"
 		},
-		"parameters": {
-			"File_Name": {
-				"type": "String",
-				"defaultValue": "@concat('Pramata_', formatDateTime(utcNow(), 'yyyyMMdd_hhmmss'), '.txt')"
-			}
-		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": {
-					"value": "@concat('Pramata_Test_',formatDateTime(utcNow(), 'MMddyyyy_ hhmmss'), '.txt')",
-					"type": "Expression"
-				},
 				"container": "varicent-test"
 			},
 			"columnDelimiter": "|",
