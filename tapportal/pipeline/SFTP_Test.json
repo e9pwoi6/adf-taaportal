@@ -125,14 +125,28 @@
 							"type": "DelimitedTextReadSettings"
 						}
 					},
+					"sink": {
+						"type": "BinarySink",
+						"storeSettings": {
+							"type": "SftpWriteSettings",
+							"operationTimeout": "01:00:00",
+							"useTempFileRename": true
+						}
+					},
 					"enableStaging": false
 				},
 				"inputs": [
 					{
 						"referenceName": "DS_Blob_Storage_Test01",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_SFTP_Outbound_Test",
 						"type": "DatasetReference",
 						"parameters": {
-							"File_Name": "@concat('Pramata_', formatDateTime(utcNow(), 'yyyyMMdd_hhmmss'), '.txt')"
+							"Directory": "/Data"
 						}
 					}
 				]
