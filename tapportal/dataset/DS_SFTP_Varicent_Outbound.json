@@ -16,6 +16,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "SftpLocation",
+				"fileName": "Pramata_*.txt",
 				"folderPath": {
 					"value": "@dataset().Directory",
 					"type": "Expression"

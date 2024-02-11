@@ -156,7 +156,13 @@
 				"outputs": [
 					{
 						"referenceName": "DS_SFTP_Varicent_Outbound",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"Directory": {
+								"value": "@pipeline().parameters.Directory",
+								"type": "Expression"
+							}
+						}
 					}
 				]
 			}
