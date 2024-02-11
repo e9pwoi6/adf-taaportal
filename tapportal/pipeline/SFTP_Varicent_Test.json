@@ -95,8 +95,6 @@
 			{
 				"name": "SFTP Varicent File",
 				"type": "Copy",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Copy_Varicent_Data",
