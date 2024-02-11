@@ -5,12 +5,17 @@
 			"referenceName": "LS_SFTP_Varicent_Test",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"Directory": {
+				"type": "string",
+				"defaultValue": "/Data"
+			}
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
-				"type": "SftpLocation",
-				"folderPath": "/Data"
+				"type": "SftpLocation"
 			},
 			"columnDelimiter": "|",
 			"escapeChar": "\\",
