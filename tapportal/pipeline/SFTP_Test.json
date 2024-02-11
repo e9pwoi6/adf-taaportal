@@ -110,7 +110,10 @@
 				"outputs": [
 					{
 						"referenceName": "DS_Blob_Storage_Test01",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"File Name": "'varicent ' + getdate()"
+						}
 					}
 				]
 			},
