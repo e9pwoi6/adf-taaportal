@@ -12,7 +12,7 @@
 			},
 			"File_Name": {
 				"type": "string",
-				"defaultValue": "@concat('Pramata_', formatDateTime(utcNow(), 'yyyyMMdd_hhmmss'), '.txt')"
+				"defaultValue": "Paramat_*.txt"
 			}
 		},
 		"annotations": [],
@@ -20,10 +20,6 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": {
-					"value": "@dataset().File_Name",
-					"type": "Expression"
-				},
 				"container": "varicent-test"
 			}
 		}
