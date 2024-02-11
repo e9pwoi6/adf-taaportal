@@ -50,7 +50,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "DS_Blob_Storage_Test01",
+						"referenceName": "DS_Blob_Storage_Test",
 						"type": "DatasetReference"
 					}
 				]
@@ -76,7 +76,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "DS_Blob_Storage_Test01",
+						"referenceName": "DS_Blob_Storage_Test",
 						"type": "DatasetReference"
 					},
 					"enableLogging": false,
@@ -145,7 +145,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "DS_Blob_Storage_Test01",
+						"referenceName": "DS_Blob_Storage_Test",
 						"type": "DatasetReference"
 					}
 				],

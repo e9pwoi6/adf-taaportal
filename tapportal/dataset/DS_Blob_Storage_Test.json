@@ -1,5 +1,5 @@
 {
-	"name": "DS_Blob_Storage_Test01",
+	"name": "DS_Blob_Storage_Test",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "LS_Blob_Storage",
