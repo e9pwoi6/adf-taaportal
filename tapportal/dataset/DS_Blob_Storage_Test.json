@@ -10,6 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
+				"fileName": "Pramata_*.txt",
 				"container": "varicent-test"
 			},
 			"columnDelimiter": "|",
