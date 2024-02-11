@@ -7,7 +7,7 @@
 		"typeProperties": {
 			"connectionString": "integrated security=True;data source=CCTAAP-006;initial catalog=PDW",
 			"userName": "NAMCK\\S9PWOI6",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiIyYTE2NGMzOC0zMzMwLTRhY2EtOGUxNi0zNzc4MzY3ZTZiN2QiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJhYzk2NjIzZS1mYThmLTQ2YjAtYjNhMi0zODg3ODI2NTMwMzIiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
 		},
 		"connectVia": {
 			"referenceName": "taaportal-dev-shir-link",
