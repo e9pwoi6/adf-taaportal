@@ -1,0 +1,22 @@
+{
+	"name": "DS_SFTP_Varicent_Outbound",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_SFTP_Varicent_Test",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "SftpLocation",
+				"folderPath": "/Data"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
