@@ -81,25 +81,12 @@
 						"partitionOption": "None"
 					},
 					"sink": {
-						"type": "DelimitedTextSink",
+						"type": "BinarySink",
 						"storeSettings": {
 							"type": "AzureBlobStorageWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".csv"
 						}
 					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
+					"enableStaging": false
 				},
 				"inputs": [
 					{
@@ -109,10 +96,10 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "DS_Blob_Storage_Test01",
+						"referenceName": "DS_Blob_Storage_Test",
 						"type": "DatasetReference",
 						"parameters": {
-							"File Name": "'varicent ' + getdate()"
+							"Directory": "/mckesson2-sftp-us-east-1/mckesson2_to_pramata/mckesson2_to_pramata/Mckesson_to_Pramata_UAT"
 						}
 					}
 				]
@@ -122,7 +109,7 @@
 				"type": "Delete",
 				"dependsOn": [
 					{
-						"activity": "Copy_To_SFTP_Folder",
+						"activity": "Copy Varicent",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -153,6 +140,29 @@
 						"recursive": true,
 						"enablePartitionDiscovery": false
 					}
+				}
+			},
+			{
+				"name": "Copy Varicent",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy_To_SFTP_Folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"enableStaging": false
 				}
 			}
 		],
