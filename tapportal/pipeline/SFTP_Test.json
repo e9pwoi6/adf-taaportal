@@ -76,19 +76,14 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "DS_Blob_Storage_Test",
-						"type": "DatasetReference",
-						"parameters": {
-							"Directory": {
-								"value": "@pipeline().parameters.Directory",
-								"type": "Expression"
-							}
-						}
+						"referenceName": "DS_Blob_Storage_Test01",
+						"type": "DatasetReference"
 					},
 					"enableLogging": false,
 					"storeSettings": {
 						"type": "AzureBlobStorageReadSettings",
 						"recursive": true,
+						"wildcardFileName": "Pramata_*.txt",
 						"enablePartitionDiscovery": false
 					}
 				}
