@@ -5,6 +5,12 @@
 			"referenceName": "LS_Blob_Storage",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"File_Name": {
+				"type": "string",
+				"defaultValue": "@concat('Pramata_', formatDateTime(utcNow(), 'yyyyMMdd_hhmmss'), '.txt')"
+			}
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
