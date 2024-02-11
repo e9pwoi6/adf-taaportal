@@ -145,6 +145,8 @@
 			{
 				"name": "Copy Varicent",
 				"type": "Copy",
+				"state": "Inactive",
+				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Copy_To_SFTP_Folder",
