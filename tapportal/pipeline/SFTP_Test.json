@@ -23,41 +23,51 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "BinarySource",
+						"type": "DelimitedTextSource",
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
-							"recursive": true,
-							"deleteFilesAfterCompletion": false
+							"recursive": true
 						},
 						"formatSettings": {
-							"type": "BinaryReadSettings"
+							"type": "DelimitedTextReadSettings"
 						}
 					},
 					"sink": {
-						"type": "BinarySink",
+						"type": "DelimitedTextSink",
 						"storeSettings": {
-							"type": "SftpWriteSettings",
-							"operationTimeout": "01:00:00",
-							"useTempFileRename": false
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
 						}
 					},
-					"enableStaging": false
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
 				},
 				"inputs": [
 					{
-						"referenceName": "DS_Blob_Storage_Test",
+						"referenceName": "DS_Blob_Storage_Test01",
 						"type": "DatasetReference",
 						"parameters": {
-							"Directory": "/mckesson2-sftp-us-east-1/mckesson2_to_pramata/mckesson2_to_pramata/Mckesson_to_Pramata_UAT"
+							"File Name": "'varicent ' + getdate()"
 						}
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "DS_SFTP_Outbound_Test",
+						"referenceName": "DS_Blob_Storage_Test01",
 						"type": "DatasetReference",
 						"parameters": {
-							"Directory": "/mckesson2-sftp-us-east-1/mckesson2_to_pramata/mckesson2_to_pramata/Mckesson_to_Pramata_UAT"
+							"File Name": "'varicent ' + getdate()"
 						}
 					}
 				]
@@ -81,12 +91,25 @@
 						"partitionOption": "None"
 					},
 					"sink": {
-						"type": "BinarySink",
+						"type": "DelimitedTextSink",
 						"storeSettings": {
 							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
 						}
 					},
-					"enableStaging": false
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
 				},
 				"inputs": [
 					{
@@ -96,10 +119,10 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "DS_Blob_Storage_Test",
+						"referenceName": "DS_Blob_Storage_Test01",
 						"type": "DatasetReference",
 						"parameters": {
-							"Directory": "/mckesson2-sftp-us-east-1/mckesson2_to_pramata/mckesson2_to_pramata/Mckesson_to_Pramata_UAT"
+							"File Name": "'varicent ' + getdate()"
 						}
 					}
 				]
