@@ -6,9 +6,9 @@
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"File Name": {
+			"File_Name": {
 				"type": "String",
-				"defaultValue": "'varicent ' + getdate()"
+				"defaultValue": "@concat('Pramata_', formatDateTime(utcNow(), 'yyyyMMdd_hhmmss'), '.txt')"
 			}
 		},
 		"annotations": [],
