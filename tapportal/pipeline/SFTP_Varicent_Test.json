@@ -117,7 +117,7 @@
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
-							"wildcardFileName": "Paramat_*.txt",
+							"wildcardFileName": "Pramata_*.txt",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
