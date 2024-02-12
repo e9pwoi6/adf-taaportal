@@ -3,59 +3,6 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Copy_Varicent_Data",
-				"type": "Copy",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "SqlServerSource",
-						"sqlReaderQuery": "SELECT  doc.DocumentID \t,REPLACE(doc.CompanyGroupName, '|', '') AS CompanyGroupName ,REPLACE(doc.DocumentType, '|', '') AS DocumentType \t,doc.EffectiveDate\n,trm.TerminationDate \t,NULL AS MCFID \t,doc.ParentDocumentID \t,NULLIF(hdr.DealProfileID, '') AS DealProfileID  ,'Pramata_11102018_062140' AS BatchID \nFROM \tFoundational.vwDocumentIndex doc  JOIN SellSide.vwDocument_TerminationDate trm  \nON trm.DocumentID = doc.DocumentID \t AND trm.TerminationDate IS NOT NULL \tLEFT JOIN PramataFileTransfer.dbo.FileTransferHeader hdr \t\nON doc.DocumentID = hdr.PramataNumber WHERE \tdoc.SubClass IN ('CPH','MHS','SA')  AND doc.DocumentType NOT IN ('MCF','Associated Materials') ",
-						"queryTimeout": "02:00:00",
-						"partitionOption": "None"
-					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
-						}
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "DS_CCTAAP_005",
-						"type": "DatasetReference"
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "DS_Blob_Storage_Test",
-						"type": "DatasetReference"
-					}
-				]
-			},
-			{
 				"name": "Clear_Storage",
 				"type": "Delete",
 				"dependsOn": [
@@ -91,14 +38,7 @@
 			{
 				"name": "SFTP Varicent File",
 				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "Copy_Varicent_Data",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "0.12:00:00",
 					"retry": 0,
