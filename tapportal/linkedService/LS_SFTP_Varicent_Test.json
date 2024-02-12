@@ -7,10 +7,11 @@
 		"typeProperties": {
 			"host": "sftp.spm.varicent.com",
 			"port": 22,
-			"skipHostKeyValidation": true,
+			"skipHostKeyValidation": false,
+			"hostKeyFingerprint": "ssh-rsa 2048 06:42:06:5c:14:0a:f1:a5:6f:1b:42:b7:6f:f6:71:b0",
 			"authenticationType": "Basic",
 			"userName": "mckessonpharmaqa",
-			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQEFGRjM2Njc2LUY2QjEtNDFBRS05NjUxLTJEQzcyNDI4QkU5Q181ZWM1MTc1ZC1hOTA3LTQyY2YtOTNmMS0yMzZmZTIwY2EzNTUiDQp9"
+			"encryptedCredential": "ew0KICAiVmVyc2lvbiI6ICIyMDE3LTExLTMwIiwNCiAgIlByb3RlY3Rpb25Nb2RlIjogIktleSIsDQogICJTZWNyZXRDb250ZW50VHlwZSI6ICJQbGFpbnRleHQiLA0KICAiQ3JlZGVudGlhbElkIjogIkRBVEFGQUNUT1JZQEFGRjM2Njc2LUY2QjEtNDFBRS05NjUxLTJEQzcyNDI4QkU5Q18xNjcyNTgxYS1jZTg2LTQ3ODEtODdhOS1lZWE5N2EyNjcxODkiDQp9"
 		}
 	}
 }
