@@ -7,7 +7,7 @@
 		"typeProperties": {
 			"connectionString": "integrated security=True;data source=CCTAAP-005;initial catalog=PramataDataWarehouse",
 			"userName": "NAMCK\\s9pwoi6",
-			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiJlYTllOGEzYS1mOWE1LTQ0MGYtOTM4Yy02MGM1MWVmMjUyZjQiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI5NzU3YjE4Zi0wNDFmLTQ1ZTItOGViNS05MGYyYzdlMzJmNDEiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
 		},
 		"connectVia": {
 			"referenceName": "taaportal-dev-shir-link",
