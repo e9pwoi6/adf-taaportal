@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlServerSource",
-						"sqlReaderQuery": "SELECT  doc.DocumentID \t,REPLACE(doc.CompanyGroupName, '|', '') AS CompanyGroupName ,REPLACE(doc.DocumentType, '|', '') AS DocumentType \t,doc.EffectiveDate\n,trm.TerminationDate \t,NULL AS MCFID \t,doc.ParentDocumentID   ,'Pramata_11102018_062140' AS BatchID \nFROM \tFoundational.vwDocumentIndex doc  JOIN SellSide.vwDocument_TerminationDate trm  \nON trm.DocumentID = doc.DocumentID \t AND trm.TerminationDate IS NOT NULL \t--LEFT JOIN PramataFileTransfer.dbo.FileTransferHeader hdr \t\n--ON doc.DocumentID = hdr.PramataNumber \nWHERE \tdoc.SubClass IN ('CPH','MHS','SA')  AND doc.DocumentType NOT IN ('MCF','Associated Materials') --\t,NULLIF(hdr.DealProfileID, '') AS DealProfileID",
+						"sqlReaderQuery": "SELECT  doc.DocumentID \t,REPLACE(doc.CompanyGroupName, '|', '') AS CompanyGroupName ,REPLACE(doc.DocumentType, '|', '') AS DocumentType,NULLIF(hdr.DealProfileID, '') AS DealProfileID \t,doc.EffectiveDate\n,trm.TerminationDate \t,NULL AS MCFID \t,doc.ParentDocumentID   ,'Pramata_11102018_062140' AS BatchID \nFROM \tFoundational.vwDocumentIndex doc  JOIN SellSide.vwDocument_TerminationDate trm  \nON trm.DocumentID = doc.DocumentID \t AND trm.TerminationDate IS NOT NULL LEFT JOIN PramataFileTransfer.dbo.FileTransferHeader hdr \t\nON doc.DocumentID = hdr.PramataNumber \nWHERE \tdoc.SubClass IN ('CPH','MHS','SA')  AND doc.DocumentType NOT IN ('MCF','Associated Materials') ",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
