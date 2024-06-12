@@ -3,7 +3,12 @@
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "TAAPortal_ADLS_Gen2_Ls",
-			"type": "LinkedServiceReference"
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"TAA_KeyVault_Nm": "kv-taa-dev",
+				"TAA_StrgAcct_Scrt_Nm": "TAAPortal-Gen2-Key",
+				"TAA_ADSL_URL": "https://asdltaaportaldev.dfs.core.windows.net/"
+			}
 		},
 		"parameters": {
 			"Container_Nm": {
