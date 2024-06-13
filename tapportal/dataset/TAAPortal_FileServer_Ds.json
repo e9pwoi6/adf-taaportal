@@ -7,7 +7,8 @@
 			"parameters": {
 				"TAA_Srvc_Acct_email": "d12hsln@mckesson.com",
 				"TAA_File_Location": "\\\\ddcfas62201v1.na.corp.mckesson.com\\cont$\\Npc\\Veterans Affairs (VA)\\FSS Files\\FSS DownloadsTest\\2014 Auto Upload FSS",
-				"TAA_KeyVault_Nm": "kv-taa-dev"
+				"TAA_KeyVault_Nm": "kv-taa-dev",
+				"TAA_VAScrt_Nm": "TAASrvc-Acct-PWD-DEV"
 			}
 		},
 		"annotations": [],
